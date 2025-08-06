@@ -1,0 +1,27 @@
+# Fabric CICD Requirements
+# ========================
+# IMPORTANT: fabric-cicd requires Python >=3.9 and <3.13
+# If using Python 3.13+, please downgrade to Python 3.12 or use conda/pyenv
+
+# Core fabric-cicd library for Microsoft Fabric deployments
+fabric-cicd>=0.1.23
+
+# Azure authentication
+azure-identity>=1.15.0
+
+# YAML parsing for parameter.yml
+PyYAML>=6.0
+
+# Optional: Enhanced command line interface
+click>=8.0.0
+
+# Optional: Configuration management
+python-dotenv>=1.0.0
+
+# Optional: Logging and monitoring
+colorlog>=6.0.0
+
+# Development dependencies (optional)
+# pytest>=7.0.0
+# black>=22.0.0
+# flake8>=4.0.0

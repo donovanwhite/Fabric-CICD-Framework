@@ -1,0 +1,136 @@
+# Connection & Reference Handling Guide
+# =====================================
+# This guide explains how fabric-cicd handles connections and references
+# during cross-region migration
+
+## 🔗 Connection Types & Handling Strategy
+
+### 1. FABRIC-TO-FABRIC REFERENCES (✅ Fully Handled)
+# These are automatically managed by fabric-cicd with dynamic variables
+
+find_replace:
+  # Lakehouse references in Notebooks
+  - find_value: "47592d55-9a83-41a8-9b21-e1ef44264161"  # Source lakehouse ID
+    replace_value:
+      DEV: "$items.Lakehouse.DataLakehouse.id"      # Dynamic reference
+      PROD: "$items.Lakehouse.DataLakehouse.id"
+    item_type: "Notebook"
+
+  # Warehouse references in Reports  
+  - find_value: "warehouse-source-id"
+    replace_value:
+      DEV: "$items.Warehouse.AnalyticsWarehouse.id"
+      PROD: "$items.Warehouse.AnalyticsWarehouse.id"
+    item_type: ["Report", "SemanticModel"]
+
+  # Workspace references
+  - find_value: "source-workspace-id"
+    replace_value:
+      DEV: "$workspace.id"
+      PROD: "$workspace.id"
+
+### 2. EXTERNAL CONNECTIONS (⚠️ Requires Manual Setup + Parameter Update)
+# Connection objects are NOT deployed, only references are updated
+
+key_value_replace:
+  # SQL Server connection in Data Pipelines
+  - find_key: "$.properties.activities[?(@.name=='Copy Data')].typeProperties.source.datasetSettings.externalReferences.connection"
+    replace_value:
+      DEV: "11111111-1111-1111-1111-111111111111"    # DEV SQL connection GUID
+      PROD: "22222222-2222-2222-2222-222222222222"   # PROD SQL connection GUID
+    item_type: "DataPipeline"
+
+  # Storage account connection
+  - find_key: "$.connections[0].connectionId"
+    replace_value:
+      DEV: '{"ClusterId":"dev-cluster-id","DatasourceId":"dev-datasource-id"}'
+      PROD: '{"ClusterId":"prod-cluster-id","DatasourceId":"prod-datasource-id"}'
+    item_type: "Dataflow"
+
+### 3. CONNECTION STRINGS & ENDPOINTS (✅ Parameter Replacement)
+# Regional endpoints and connection strings are updated
+
+find_replace:
+  # SQL Server endpoints
+  - find_value: "source-region-server.database.windows.net"
+    replace_value:
+      DEV: "dev-region-server.database.windows.net"
+      PROD: "prod-region-server.database.windows.net"
+    item_type: ["DataPipeline", "Dataflow", "SemanticModel"]
+
+  # Storage account names
+  - find_value: "sourcestorageaccount"
+    replace_value:
+      DEV: "devstorageaccount"
+      PROD: "prodstorageaccount"
+    item_type: ["Lakehouse", "Dataflow"]
+
+  # API endpoints
+  - find_value: "https://api.source-region.contoso.com"
+    replace_value:
+      DEV: "https://api.dev-region.contoso.com"
+      PROD: "https://api.prod-region.contoso.com"
+    item_type: ["Notebook", "DataPipeline"]
+
+### 4. ADVANCED REGEX PATTERNS (✅ Complex Reference Updates)
+# For complex metadata updates using regex
+
+find_replace:
+  # Notebook lakehouse metadata
+  - find_value: '\#\s*META\s+"default_lakehouse":\s*"([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})"'
+    replace_value:
+      DEV: "$items.Lakehouse.MainLakehouse.id"
+      PROD: "$items.Lakehouse.MainLakehouse.id"
+    is_regex: "true"
+    item_type: "Notebook"
+    file_path: "**/notebook-content.py"
+
+  # Dataflow workspace and item references
+  - find_value: 'Navigation_1\s*=\s*Pattern\{\[workspaceId\s*=\s*"([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})"\]\}'
+    replace_value:
+      DEV: "$workspace.id"
+      PROD: "$workspace.id"
+    is_regex: "true"
+    item_type: "Dataflow"
+    file_path: "**/mashup.pq"
+
+### 5. SPARK POOL CONNECTIONS (✅ Environment Configuration)
+# Spark pool assignments for different regions/capacities
+
+spark_pool:
+  - instance_pool_id: "source-pool-instance-id"
+    replace_value:
+      DEV:
+        type: "Capacity"
+        name: "DevRegion_Medium_Pool"
+      PROD:
+        type: "Capacity"
+        name: "ProdRegion_Large_Pool"
+    item_name: ["ProductionEnvironment", "DataScienceEnvironment"]
+
+## 🔧 MANUAL CONNECTION SETUP REQUIRED
+
+# These connection types require manual setup in target workspace:
+# 1. SQL Server connections
+# 2. Azure Storage connections  
+# 3. REST API connections
+# 4. On-premises data gateway connections
+# 5. Service principal authentications
+
+## 📋 PRE-MIGRATION CHECKLIST
+
+# Before running fabric-cicd migration:
+# ✅ Create all external connections in target workspace
+# ✅ Note down connection GUIDs for parameter.yml
+# ✅ Verify external systems are accessible from target region
+# ✅ Update firewall rules for new region IP ranges
+# ✅ Test connectivity from target workspace
+
+## 🔍 POST-MIGRATION VALIDATION
+
+# After migration, verify:
+# ✅ All item cross-references work (Notebook → Lakehouse)
+# ✅ External connections function (Data Pipeline → SQL Server)
+# ✅ Reports display data correctly
+# ✅ Dataflows can connect to sources and destinations
+# ✅ Spark environments use correct pools

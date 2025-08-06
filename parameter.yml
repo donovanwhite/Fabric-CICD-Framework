@@ -1,0 +1,225 @@
+# Microsoft Fabric CICD Parameter Configuration
+# =============================================
+# This file manages environment-specific values for cross-region deployment
+# 
+# Usage: Place this file in the root of your Git repository containing Fabric items
+# Structure: /<repository-root>/parameter.yml
+#
+# Environments supported: DEV, STAGING, PROD (customize as needed)
+# Item types: Notebook, Report, Dashboard, SemanticModel, Lakehouse, Warehouse, 
+#            DataPipeline, Dataflow, Environment, SQLEndpoint, etc.
+
+# =============================================================================
+# FIND AND REPLACE PARAMETERIZATION
+# =============================================================================
+# Use for generic string replacement across all file types
+# Common use cases: Workspace IDs, Item IDs, Connection strings, URLs
+
+find_replace:
+  # Workspace ID replacement - replaces workspace references in items
+  - find_value: "SOURCE_WORKSPACE_ID_PLACEHOLDER"  # Replace with your source workspace ID
+    replace_value:
+      DEV: "$workspace.id"      # Dynamic: Uses target DEV workspace ID
+      STAGING: "$workspace.id"  # Dynamic: Uses target STAGING workspace ID  
+      PROD: "$workspace.id"     # Dynamic: Uses target PROD workspace ID
+    item_type: ["Notebook", "DataPipeline", "Dataflow", "Report"]
+    file_path: "**/notebook-content.py"  # Filter to specific file types
+
+  # Lakehouse ID replacement - for notebooks that reference specific lakehouses
+  - find_value: "SOURCE_LAKEHOUSE_ID_PLACEHOLDER"  # Replace with your source lakehouse ID
+    replace_value:
+      DEV: "$items.Lakehouse.DevLakehouse.id"      # Dynamic: References deployed lakehouse
+      STAGING: "$items.Lakehouse.StagingLakehouse.id"
+      PROD: "$items.Lakehouse.ProdLakehouse.id" 
+    item_type: ["Notebook", "Dataflow"]
+    item_name: ["DataProcessingNotebook", "ETLNotebook"]  # Target specific notebooks
+
+  # Warehouse ID replacement - for reports and semantic models
+  - find_value: "SOURCE_WAREHOUSE_ID_PLACEHOLDER"  # Replace with your source warehouse ID
+    replace_value:
+      DEV: "$items.Warehouse.DevWarehouse.id"
+      STAGING: "$items.Warehouse.StagingWarehouse.id"
+      PROD: "$items.Warehouse.ProdWarehouse.id"
+    item_type: ["SemanticModel", "Report"]
+
+  # SQL Connection String replacement - for external data sources
+  - find_value: "SERVER_CONNECTION_STRING_PLACEHOLDER"  # Replace with source connection
+    replace_value:
+      DEV: "dev-server.database.windows.net"
+      STAGING: "staging-server.database.windows.net"
+      PROD: "prod-server.database.windows.net"
+    item_type: ["DataPipeline", "Dataflow"]
+
+  # Power BI Dataset/Semantic Model ID replacement
+  - find_value: "SOURCE_DATASET_ID_PLACEHOLDER"  # Replace with source dataset ID
+    replace_value:
+      DEV: "$items.SemanticModel.SalesDataset.id"
+      STAGING: "$items.SemanticModel.SalesDataset.id"
+      PROD: "$items.SemanticModel.SalesDataset.id"
+    item_type: "Report"
+
+  # Storage Account replacement - for lakehouse external connections
+  - find_value: "sourcestorageaccount"  # Replace with source storage account name
+    replace_value:
+      DEV: "devstorageaccount"
+      STAGING: "stagingstorageaccount"
+      PROD: "prodstorageaccount"
+    item_type: ["Lakehouse", "Dataflow"]
+
+  # API Endpoint replacement - for external API calls
+  - find_value: "https://api.source-region.example.com"  # Replace with source API endpoint
+    replace_value:
+      DEV: "https://api.dev-region.example.com"
+      STAGING: "https://api.staging-region.example.com" 
+      PROD: "https://api.prod-region.example.com"
+    item_type: ["Notebook", "DataPipeline"]
+
+  # Advanced Regex Example: Lakehouse metadata in notebooks
+  - find_value: '\#\s*META\s+"default_lakehouse":\s*"([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})"'  # Regex pattern for lakehouse GUID
+    replace_value:
+      DEV: "$items.Lakehouse.MainLakehouse.id"
+      STAGING: "$items.Lakehouse.MainLakehouse.id"
+      PROD: "$items.Lakehouse.MainLakehouse.id"
+    is_regex: "true"  # Enable regex pattern matching
+    item_type: "Notebook"
+    file_path: "**/notebook-content.py"
+
+  # Advanced Regex Example: Workspace ID in notebook metadata
+  - find_value: '\#\s*META\s+"default_lakehouse_workspace_id":\s*"([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})"'  # Regex pattern for workspace GUID
+    replace_value:
+      DEV: "$workspace.id"
+      STAGING: "$workspace.id"
+      PROD: "$workspace.id"
+    is_regex: "true"
+    item_type: "Notebook"
+
+# =============================================================================
+# KEY-VALUE REPLACEMENT PARAMETERIZATION
+# =============================================================================
+# Use for JSON/YAML files with specific key paths (like Data Pipelines)
+# Uses JSONPath expressions to target specific configuration values
+
+key_value_replace:
+  # Data Pipeline SQL Connection replacement
+  - find_key: "$.properties.activities[?(@.name=='Copy Data')].typeProperties.source.datasetSettings.externalReferences.connection"
+    replace_value:
+      DEV: "dev-sql-connection-guid"        # Replace with actual DEV connection GUID
+      STAGING: "staging-sql-connection-guid"
+      PROD: "prod-sql-connection-guid"
+    item_type: "DataPipeline"
+    item_name: ["ETLPipeline", "DataIngestionPipeline"]
+
+  # Data Pipeline destination lakehouse reference
+  - find_key: "$.properties.activities[?(@.name=='Copy Data')].typeProperties.sink.datasetSettings.linkedService.properties.typeProperties.artifactId"
+    replace_value:
+      DEV: "$items.Lakehouse.TargetLakehouse.id"
+      STAGING: "$items.Lakehouse.TargetLakehouse.id"
+      PROD: "$items.Lakehouse.TargetLakehouse.id"
+    item_type: "DataPipeline"
+
+  # Data Pipeline workspace reference
+  - find_key: "$.properties.activities[?(@.name=='Copy Data')].typeProperties.sink.datasetSettings.linkedService.properties.typeProperties.workspaceId"
+    replace_value:
+      DEV: "$workspace.id"
+      STAGING: "$workspace.id"
+      PROD: "$workspace.id"
+    item_type: "DataPipeline"
+
+  # Dataflow query metadata connection reference
+  - find_key: "$.connections[0].connectionId"
+    replace_value:
+      DEV: '{"ClusterId":"dev-cluster-id","DatasourceId":"dev-datasource-id"}'
+      STAGING: '{"ClusterId":"staging-cluster-id","DatasourceId":"staging-datasource-id"}'
+      PROD: '{"ClusterId":"prod-cluster-id","DatasourceId":"prod-datasource-id"}'
+    item_type: "Dataflow"
+    file_path: "**/queryMetadata.json"
+
+# =============================================================================
+# SPARK POOL PARAMETERIZATION
+# =============================================================================
+# Use for Environment items that reference custom Spark pools
+# Note: fabric-cicd library manages workspace assignment automatically
+
+spark_pool:
+  # Production-grade large pool configuration
+  - instance_pool_id: "SOURCE_LARGE_POOL_ID_PLACEHOLDER"  # Replace with source pool ID
+    replace_value:
+      DEV:
+        type: "Workspace"     # Pool type: only Workspace pools supported
+        name: "DevPool_Small" # Smaller pool for development
+      STAGING:
+        type: "Workspace"
+        name: "StagingPool_Medium"
+      PROD:
+        type: "Workspace"  
+        name: "ProdPool_Large"    # Large pool for production workloads
+    item_name: ["ProductionEnvironment", "MLEnvironment"]
+
+  # Development-optimized pool configuration  
+  - instance_pool_id: "SOURCE_MEDIUM_POOL_ID_PLACEHOLDER"  # Replace with source pool ID
+    replace_value:
+      DEV:
+        type: "Workspace"     # Use workspace pool for development
+        name: "DefaultPool"
+      STAGING:
+        type: "Workspace"
+        name: "StagingPool_Medium"
+      PROD:
+        type: "Workspace"
+        name: "ProdPool_Medium"
+    item_name: "DevEnvironment"
+
+# =============================================================================
+# CROSS-REGION DEPLOYMENT NOTES
+# =============================================================================
+# 
+# When migrating between regions, consider:
+#
+# 1. Pool Differences:
+#    - Pool names and sizes may differ between regions
+#    - Update spark_pool configurations accordingly
+#
+# 2. Connection Dependencies:
+#    - SQL connections, storage accounts, APIs may have region-specific endpoints
+#    - Update find_replace values for connection strings
+#
+# 3. Data Source Locations:
+#    - External data sources may need region-specific configuration
+#    - Update key_value_replace for data pipeline connections
+#
+# 4. Performance Considerations:
+#    - Different regions may have different SKU availability
+#    - Adjust environment and pool configurations per region
+#
+# 5. Compliance Requirements:
+#    - Some regions may have specific data residency requirements
+#    - Ensure configuration meets regional compliance needs
+#
+# =============================================================================
+# DYNAMIC REPLACEMENT VARIABLES
+# =============================================================================
+#
+# fabric-cicd supports these dynamic variables:
+#
+# $workspace.id                           - Target workspace ID
+# $items.<ItemType>.<ItemName>.id        - Deployed item ID
+# $items.<ItemType>.<ItemName>.sqlendpoint - SQL endpoint (Lakehouse/Warehouse only)  
+# $items.<ItemType>.<ItemName>.queryserviceuri - Query URI (Eventhouse only)
+#
+# Example Item Types: Notebook, Report, Dashboard, SemanticModel, Lakehouse, 
+#                    Warehouse, DataPipeline, Dataflow, Environment, etc.
+#
+# =============================================================================
+# ENVIRONMENT VARIABLE REPLACEMENT (Optional)
+# =============================================================================
+#
+# If enable_environment_variable_replacement feature flag is set,
+# you can use environment variables:
+#
+# find_replace:
+#   - find_value: "CONNECTION_STRING_PLACEHOLDER"
+#     replace_value:
+#       DEV: "$ENV:DEV_CONNECTION_STRING"
+#       PROD: "$ENV:PROD_CONNECTION_STRING"
+#
+# =============================================================================
