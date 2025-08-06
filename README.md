@@ -1,6 +1,6 @@
-# 🚀 Microsoft Fabric CICD Cross-Region Migration Solution
+# 🚀 Microsoft Fabric CICD Solution
 
-**A comprehensive, production-ready solution for automated deployment and cross-region migration of Microsoft Fabric workspaces using the fabric-cicd library.**
+**A comprehensive, production-ready solution for automated deployment Microsoft Fabric workspaces using the fabric-cicd library.**
 
 [![Python](https://img.shields.io/badge/Python-3.8%2B-blue)](https://python.org)
 [![Fabric CICD](https://img.shields.io/badge/fabric--cicd-v0.1.23-green)](https://pypi.org/project/fabric-cicd/)
