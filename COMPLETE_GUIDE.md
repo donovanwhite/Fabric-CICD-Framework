@@ -1,6 +1,6 @@
-# Complete Fabric CI/CD Migration Guide
+# Complete Fabric CI/CD Guide
 
-This comprehensive guide covers all aspects of using the fabric-cicd library for Microsoft Fabric workspace migrations across regions and capacities.
+This comprehensive guide covers all aspects of using the fabric-cicd library for Microsoft Fabric workspaces.
 
 ## 📁 Repository Structure
 

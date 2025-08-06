@@ -1,7 +1,6 @@
 # Connection & Reference Handling Guide
 # =====================================
 # This guide explains how fabric-cicd handles connections and references
-# during cross-region migration
 
 ## 🔗 Connection Types & Handling Strategy
 

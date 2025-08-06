@@ -22,11 +22,30 @@ import os
 import subprocess
 import tempfile
 import shutil
+import stat
+import errno
 from pathlib import Path
 from typing import Optional
 
 # Add the current directory to Python path for imports
 sys.path.append(str(Path(__file__).parent))
+
+def handle_remove_readonly(func, path, exc):
+    """
+    Windows error handler for readonly files during cleanup
+    
+    Args:
+        func: Function that raised the exception
+        path: Path to the file
+        exc: Exception information tuple
+    """
+    excvalue = exc[1]
+    if func in (os.rmdir, os.remove, os.unlink) and excvalue.errno == errno.EACCES:
+        # Change file permissions and retry
+        os.chmod(path, stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)  # 0o777
+        func(path)
+    else:
+        raise
 
 try:
     from fabric_cicd import FabricWorkspace
@@ -73,7 +92,7 @@ class FabricDevOpsDeployment:
         if target_path:
             clone_path = Path(target_path).resolve()
             if clone_path.exists():
-                shutil.rmtree(clone_path)
+                shutil.rmtree(clone_path, onerror=handle_remove_readonly)
         else:
             # Use temporary directory
             temp_dir = tempfile.mkdtemp(prefix="fabric_deploy_")
@@ -242,7 +261,7 @@ class FabricDevOpsDeployment:
             # Cleanup temporary repository if created
             if self.temp_repo_path and self.temp_repo_path.exists():
                 print(f"🧹 Cleaning up temporary repository: {self.temp_repo_path}")
-                shutil.rmtree(self.temp_repo_path)
+                shutil.rmtree(self.temp_repo_path, onerror=handle_remove_readonly)
 
     def deploy_from_devops(self, workspace_id: str, environment: str,
                           repo_url: Optional[str] = None, 
@@ -328,7 +347,7 @@ class FabricDevOpsDeployment:
             # Cleanup temporary repository if created
             if self.temp_repo_path and self.temp_repo_path.exists():
                 print(f"🧹 Cleaning up temporary repository: {self.temp_repo_path}")
-                shutil.rmtree(self.temp_repo_path)
+                shutil.rmtree(self.temp_repo_path, onerror=handle_remove_readonly)
 
 def main():
     parser = argparse.ArgumentParser(

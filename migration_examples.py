@@ -440,6 +440,10 @@ def main():
 def run_scenario_with_args(args):
     """Run specific scenario with command line arguments"""
     
+    # Handle "all" item type option
+    if args.items and len(args.items) == 1 and args.items[0].lower() == 'all':
+        args.items = None  # None means all item types
+    
     print("🚀 Fabric Cross-Region Migration Examples")
     print("="*60)
     print(f"📋 Scenario: {args.scenario}")
@@ -447,6 +451,8 @@ def run_scenario_with_args(args):
     print(f"🔧 Mode: {'Simple' if args.simple else f'Parameterized ({args.target_env})'}")
     if args.items:
         print(f"📦 Items: {', '.join(args.items)}")
+    else:
+        print(f"📦 Items: All discovered item types")
     print(f"🔍 Dry Run: {'Yes' if args.dry_run else 'No'}")
     print("="*60)
     

@@ -120,21 +120,36 @@ pip install -r requirements.txt
 
 ## ⚡ Quick Start
 
-### 📥 **Step 1: Installation**
-```bash
+### 📥 **Step 1: One-Command Setup (Recommended)**
+```batch
 # Clone the repository
 git clone <your-repo-url>
 cd fabric-cicd-solution
 
-# Setup Python environment
-conda create -n fabric-cicd python=3.12.11
+# Run the complete environment setup
+setup_fabric_cicd.bat
+
+# This single script will:
+# ✅ Detect/configure Conda (Anaconda/Miniconda)
+# ✅ Create conda environment with Python 3.12
+# ✅ Install all dependencies from requirements.txt
+# ✅ Configure Azure CLI (optional)
+# ✅ Test installation and validate setup
+# ✅ Create environment activation helper
+
+# Custom options available:
+setup_fabric_cicd.bat --skip-azure-cli              # Skip Azure CLI
+setup_fabric_cicd.bat --environment-name my-env     # Custom env name
+```
+
+### 📥 **Step 1 Alternative: Manual Setup**
+```bash
+# If you prefer manual setup or troubleshooting
+conda create -n fabric-cicd python=3.12
 conda activate fabric-cicd
-
-# Install dependencies
 pip install -r requirements.txt
-
-# Verify installation
 python check_python.py
+az login  # For Azure authentication
 ```
 
 ### 📂 **Step 2: Repository Structure**
