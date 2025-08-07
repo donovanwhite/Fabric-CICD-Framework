@@ -47,23 +47,41 @@ This framework provides a **simple, tested approach** for deploying Microsoft Fa
 
 ## 🛠️ QUICK START
 
-### 1. Install Dependencies
+### 1. Environment Setup (Recommended)
+```batch
+REM Windows: Run the automated setup script
+setup.bat
+```
+This script will:
+- ✅ Create a conda environment with Python 3.12
+- ✅ Install all dependencies from requirements.txt
+- ✅ Configure VS Code settings for the environment
+- ✅ Verify Python and fabric-cicd version compatibility
+- ✅ Test fabric-cicd installation
+
+### 2. Manual Installation (Alternative)
 ```bash
 pip install fabric-cicd GitPython azure-identity
 ```
 
-### 2. Authenticate
+### 3. Authenticate
 ```bash
 az login
 ```
 
-### 3. Configure Parameters (Optional)
+### 4. Quick Environment Activation
+```batch
+REM After setup, use this to quickly activate the environment
+activate_fabric_env.bat
+```
+
+### 5. Configure Parameters (Optional)
 For cross-environment deployments with parameterization:
 - See `parameter_example.yml` for comprehensive examples with real-world values
 - Copy and customize patterns that match your infrastructure
 - Supports all 19 fabric-cicd v0.1.24 item types
 
-### 4. Deploy
+### 6. Deploy
 ```bash
 python fabric_deploy.py \
     --workspace-id "your-workspace-id" \
@@ -80,14 +98,18 @@ Check your Fabric workspace - all items should be deployed with folder structure
 ├── fabric_deploy.py              # Main deployment script
 └── fabric_deploy_simple.py       # Simple deployment alternative
 
-🔧 UTILITIES
+🔧 ENVIRONMENT SETUP
+├── setup.bat                     # Automated conda environment setup
+├── activate_fabric_env.bat       # Quick environment activation
+└── requirements.txt              # Python dependencies
+
+🛠️  UTILITIES
 ├── check_python.py              # Environment verification  
 └── validate_connections.py      # Connection validation
 
 📋 CONFIGURATION
 ├── parameter.yml                # Basic parameter file
 ├── parameter_example.yml        # Comprehensive parameter examples with real values
-├── requirements.txt             # Python dependencies
 └── azure-pipelines.yml          # Azure DevOps pipeline
 
 🧪 TESTING
