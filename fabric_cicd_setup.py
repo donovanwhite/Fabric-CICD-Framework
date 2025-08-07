@@ -4,14 +4,14 @@ Microsoft Fabric CI/CD Setup Script
 =============================================================
 
 This script sets up CI/CD for Microsoft Fabric using the fabric-cicd library.
-Based on testing and community feedback, this uses a straightforward approach.
+Based on extensive testing and troubleshooting, this uses the SIMPLE approach that actually works.
 
-RECOMMENDED APPROACH:
+SUCCESSFUL APPROACH:
 ✅ Uses basic publish_all_items() function from fabric-cicd documentation
 ✅ Lets fabric-cicd handle subdirectory structures natively (Migration/, Warehouse/, etc.)
-✅ Avoids complex parameter.yml configurations that may cause validation errors
+✅ Avoids complex parameter.yml configurations that cause validation errors
 ✅ Specifies item types based on actual repository analysis
-✅ Tested with 8 Fabric items across subdirectories
+✅ Successfully tested with 8 Fabric items across subdirectories
 
 KEY LEARNINGS FROM TESTING:
 1. Complex parameter.yml files cause validation errors ("Invalid parameter name 'find_key'")
@@ -36,10 +36,10 @@ TESTED WITH:
 - Result: ✅ ALL ITEMS DEPLOYED SUCCESSFULLY
 
 Usage:
-    python fabric_cicd_setup.py --workspace-id <workspace-id> --repo-url <repo-url>
+    python fabric_cicd_setup_working.py --workspace-id <workspace-id> --repo-url <repo-url>
     
 Example:
-    python fabric_cicd_setup.py \
+    python fabric_cicd_setup_working.py \
         --workspace-id "eb2f7de1-b2d5-4852-a744-735106d8dfe8" \
         --repo-url "https://dev.azure.com/contoso/Project/_git/repo" \
         --branch main
@@ -109,18 +109,18 @@ def analyze_repository(repo_path):
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Deploy Fabric items using fabric-cicd library',
+        description='Deploy Fabric items using PROVEN working fabric-cicd approach',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
   # Basic deployment
-  python fabric_cicd_setup.py --workspace-id "your-workspace-id" --repo-url "https://dev.azure.com/org/proj/_git/repo"
+  python fabric_cicd_setup_working.py --workspace-id "your-workspace-id" --repo-url "https://dev.azure.com/org/proj/_git/repo"
   
   # With specific branch
-  python fabric_cicd_setup.py --workspace-id "your-workspace-id" --repo-url "repo-url" --branch development
+  python fabric_cicd_setup_working.py --workspace-id "your-workspace-id" --repo-url "repo-url" --branch development
   
   # Dry run (analyze only)
-  python fabric_cicd_setup.py --workspace-id "your-workspace-id" --repo-url "repo-url" --dry-run
+  python fabric_cicd_setup_working.py --workspace-id "your-workspace-id" --repo-url "repo-url" --dry-run
         """
     )
     
@@ -142,7 +142,7 @@ Examples:
     repo_path = None
     
     try:
-        print("🚀 FABRIC CI/CD DEPLOYMENT")
+        print("🚀 FABRIC CI/CD DEPLOYMENT (PROVEN WORKING SOLUTION)")
         print("=" * 60)
         print(f"📂 Temporary directory: {temp_dir}")
         print(f"🔗 Repository: {args.repo_url}")
@@ -205,9 +205,9 @@ Examples:
             print(f"📊 Would deploy {total_items} items of types: {item_types}")
             return
         
-        # Initialize FabricWorkspace using recommended pattern
+        # Initialize FabricWorkspace using the PROVEN WORKING pattern
         print("🔧 Initializing FabricWorkspace...")
-        print("   Using straightforward approach!")
+        print("   Using SIMPLE approach that actually works!")
         
         try:
             workspace = FabricWorkspace(
@@ -229,9 +229,9 @@ Examples:
         print(f"   📦 Item types in scope: {item_types}")
         print()
         
-        # Execute deployment using recommended approach
+        # Execute deployment using PROVEN WORKING approach
         print("🚀 Deploying using publish_all_items()...")
-        print("   This is the straightforward fabric-cicd approach!")
+        print("   This is the SIMPLE approach that actually works!")
         print(f"   Deploying {total_items} items...")
         print()
         
