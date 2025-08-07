@@ -2,6 +2,8 @@
 
 🎉 **SUCCESS!** This framework has been thoroughly tested and proven to work with real Azure DevOps repositories.
 
+> 📚 **Need more details?** For comprehensive troubleshooting, lessons learned, and advanced scenarios, see the **[📖 COMPLETE GUIDE](COMPLETE_GUIDE.md)**
+
 ## ✅ PROVEN RESULTS
 - **Successfully deployed 8 Fabric items** from Azure DevOps repository
 - **Repository structure:** Items in subdirectories (Migration/, Warehouse/)
@@ -188,6 +190,12 @@ If you encounter issues:
 2. Check the diagnostic output for item discovery
 3. Verify authentication with `az account show`
 4. Ensure your repository structure matches the expected format
+
+**Need more help?** 👉 See the **[📖 COMPLETE GUIDE](COMPLETE_GUIDE.md)** for:
+- Detailed troubleshooting steps
+- Lessons learned from extensive testing
+- Advanced scenarios and configurations
+- Performance metrics and best practices
 
 ## 🎉 SUCCESS METRICS
 
