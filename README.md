@@ -1,4 +1,4 @@
-# Microsoft Fabric CI/CD Migration Framework - PROVEN WORKING SOLUTION
+# Microsoft Fabric CI/CD Migration Framework
 
 🎉 **SUCCESS!** This framework has been thoroughly tested and proven to work with real Azure DevOps repositories.
 
@@ -57,14 +57,20 @@ pip install fabric-cicd GitPython azure-identity
 az login
 ```
 
-### 3. Deploy (PROVEN WORKING)
+### 3. Configure Parameters (Optional)
+For cross-environment deployments with parameterization:
+- See `parameter_example.yml` for comprehensive examples with real-world values
+- Copy and customize patterns that match your infrastructure
+- Supports all 19 fabric-cicd v0.1.24 item types
+
+### 4. Deploy
 ```bash
-python fabric_cicd_setup_working.py \
+python fabric_cicd_setup.py \
     --workspace-id "your-workspace-id" \
     --repo-url "https://dev.azure.com/org/project/_git/repo"
 ```
 
-### 4. Verify
+### 5. Verify
 Check your Fabric workspace - all items should be deployed with folder structure preserved!
 
 ## 📋 WHAT'S INCLUDED
@@ -80,6 +86,7 @@ Check your Fabric workspace - all items should be deployed with folder structure
 
 📋 CONFIGURATION
 ├── parameter.yml                # Basic parameter file
+├── parameter_example.yml        # Comprehensive parameter examples with real values
 ├── requirements.txt             # Python dependencies
 └── azure-pipelines.yml          # Azure DevOps pipeline
 
@@ -121,14 +128,22 @@ Our solution was developed through extensive testing:
 
 ### Basic Deployment
 ```bash
-python fabric_cicd_setup_working.py \
+python fabric_cicd_setup.py \
     --workspace-id "eb2f7de1-b2d5-4852-a744-735106d8dfe8" \
     --repo-url "https://dev.azure.com/contoso/FabricProject/_git/analytics"
 ```
 
+### With Parameterization
+```bash
+python fabric_cicd_setup.py \
+    --workspace-id "your-workspace-id" \
+    --repo-url "your-repo-url" \
+    --environment PROD
+```
+
 ### Specific Branch
 ```bash
-python fabric_cicd_setup_working.py \
+python fabric_cicd_setup.py \
     --workspace-id "your-workspace-id" \
     --repo-url "your-repo-url" \
     --branch development
@@ -136,7 +151,7 @@ python fabric_cicd_setup_working.py \
 
 ### Dry Run (Analysis Only)
 ```bash
-python fabric_cicd_setup_working.py \
+python fabric_cicd_setup.py \
     --workspace-id "your-workspace-id" \
     --repo-url "your-repo-url" \
     --dry-run
@@ -144,11 +159,37 @@ python fabric_cicd_setup_working.py \
 
 ### Specific Item Types
 ```bash
-python fabric_cicd_setup_working.py \
+python fabric_cicd_setup.py \
     --workspace-id "your-workspace-id" \
     --repo-url "your-repo-url" \
     --item-types Notebook Lakehouse
 ```
+
+## 📊 PARAMETERIZATION EXAMPLES
+
+The included `parameter_example.yml` demonstrates:
+
+### 🏢 **Real-World Scenarios**
+- **Retail Analytics Platform**: Complete DEV/UAT/PROD deployment examples
+- **All 19 Item Types**: Comprehensive coverage of fabric-cicd v0.1.24 capabilities
+- **Actual Values**: Realistic connection strings, GUIDs, and configurations (sanitized)
+
+### 🔧 **Three Configuration Types**
+- **`find_replace`**: Simple string replacements across files
+- **`key_value_replace`**: JSONPath-based updates for complex configurations  
+- **`spark_pool`**: Environment-specific Spark pool management
+
+### 🌍 **Cross-Environment Patterns**
+- SQL Server: `server-env.database.windows.net`
+- Storage: `accountnameenv.dfs.core.windows.net`
+- Event Hub: `namespace-env.servicebus.windows.net`
+- APIs: `api-env.company.com`
+
+### 🔒 **Security Best Practices**
+- Dynamic item references: `$items.Lakehouse.DataLake.id`
+- Workspace variables: `$workspace.id`
+- Key Vault integration patterns
+- Managed identity considerations
 
 ## 🔧 TROUBLESHOOTING
 

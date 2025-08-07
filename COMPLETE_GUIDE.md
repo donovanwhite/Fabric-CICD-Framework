@@ -218,6 +218,85 @@ Based on our testing with 8 Fabric items:
 - Don't guess item types - analyze repository first
 - Don't try to create folders manually via API
 
+## 📋 PARAMETERIZATION GUIDE
+
+For cross-environment deployments, we've included `parameter_example.yml` with comprehensive real-world examples.
+
+### 🌟 **When to Use Parameterization**
+- **Multi-environment deployments** (DEV → UAT → PROD)
+- **Cross-region migrations** with different connection strings
+- **Dynamic item references** between Fabric artifacts
+- **Environment-specific configurations** (different database servers, storage accounts, API endpoints)
+
+### 📊 **Parameter Example Features**
+
+#### **🏢 Complete Retail Analytics Example**
+The example demonstrates a realistic retail analytics platform with:
+- **Environments**: DEV, UAT, PROD configurations
+- **19 Item Types**: All fabric-cicd v0.1.24 supported types
+- **Real Values**: Actual connection patterns (sanitized for security)
+
+#### **🔧 Three Configuration Types**
+
+1. **`find_replace`** - Simple string replacement
+   ```yaml
+   - find_value: "retail-source-dev.database.windows.net"
+     replace_value:
+       DEV: "retail-source-dev.database.windows.net"
+       UAT: "retail-source-uat.database.windows.net"
+       PROD: "retail-source-prod.database.windows.net"
+     item_type: "DataPipeline"
+   ```
+
+2. **`key_value_replace`** - JSONPath-based updates
+   ```yaml
+   - find_key: "$.model.dataSources[0].connectionDetails.address.server"
+     replace_value:
+       DEV: "retailwarehouse-dev.datawarehouse.fabric.microsoft.com"
+       PROD: "retailwarehouse-prod.datawarehouse.fabric.microsoft.com"
+     item_type: "SemanticModel"
+   ```
+
+3. **`spark_pool`** - Environment-specific Spark pools
+   ```yaml
+   - instance_pool_id: "large-pool-12345678-abcd-ef12-3456-789012345678"
+     replace_value:
+       DEV: {type: "Workspace", name: "DevPool_Small"}
+       PROD: {type: "Workspace", name: "ProdPool_Large"}
+     item_type: "Environment"
+   ```
+
+#### **🔒 Dynamic References**
+- **Workspace Variables**: `$workspace.id` - Automatically resolved
+- **Item References**: `$items.Lakehouse.DataLake.id` - Cross-artifact dependencies
+- **Security Patterns**: Key Vault integration, managed identity examples
+
+#### **🌍 Real-World Connection Patterns**
+- **SQL Server**: `server-env.database.windows.net`
+- **Storage Accounts**: `accountnameenv.dfs.core.windows.net`
+- **Event Hubs**: `namespace-env.servicebus.windows.net`
+- **APIs**: `api-env.company.com`
+
+### 📝 **Usage with Parameterization**
+```bash
+# Deploy with environment-specific parameters
+python fabric_cicd_setup.py \
+    --workspace-id "your-workspace-id" \
+    --repo-url "your-repo-url" \
+    --environment PROD
+
+# The script automatically:
+# 1. Detects parameter.yml in repository
+# 2. Applies environment-specific replacements  
+# 3. Deploys items with updated configurations
+```
+
+### ⚠️ **Important Notes**
+- **Start Simple**: Use basic deployment first, add parameterization when needed
+- **Security**: Never commit real secrets - use Key Vault references
+- **Testing**: Always test with DEV environment before PROD
+- **Validation**: Parameter validation errors indicate overly complex configurations
+
 ## 🚀 AZURE DEVOPS INTEGRATION
 
 ### Pipeline Configuration (Proven Working)
