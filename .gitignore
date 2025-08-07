@@ -1,1 +1,67 @@
-__pycache__/ 
+# Fabric CICD - Ignore debug and temporary files
+# ================================================
+
+# Debug and test files
+*debug*
+*test*
+*temp*
+*tmp*
+*working*
+*backup*
+*_old*
+*_new*
+*_copy*
+
+# Specific debug patterns we encountered
+fabric_deploy_devops*.py
+*_debug_*.py
+*_test_*.py
+*_working_*.py
+test_*.bat
+debug_*.bat
+
+# VS Code and IDE files
+.vscode/
+*.code-workspace
+.vs/
+
+# Python cache and virtual environments
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+.env
+
+# Logs and reports
+*.log
+*_report.txt
+*_analysis.txt
+debug_output.txt
+
+# Temporary documentation
+*_TEMP.md
+*_DRAFT.md
+*_BACKUP.md
+TEMP_*.md
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Azure and deployment artifacts
+.azure/
+*.deploy
+*.deployment
+
+# Fabric workspace exports (temporary)
+workspace_export_*/
+temp_workspace/
