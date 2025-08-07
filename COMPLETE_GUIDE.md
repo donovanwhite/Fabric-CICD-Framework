@@ -1,22 +1,22 @@
 # Microsoft Fabric CI/CD - COMPLETE GUIDE
 
-## 🎉 PROVEN SUCCESS
+## 📋 OVERVIEW
 
-This guide documents the **proven working solution** for Microsoft Fabric CI/CD using the fabric-cicd library. After extensive testing and troubleshooting, we've identified the approach that actually works.
+This guide documents a practical solution for Microsoft Fabric CI/CD using the fabric-cicd library, based on testing and community feedback.
 
-## ✅ SUCCESS METRICS
+## ✅ TEST RESULTS
 
 - **✅ 8/8 Fabric items deployed successfully**
 - **✅ Repository with subdirectory structure (Migration/, Warehouse/)**
 - **✅ Items: 6 Notebooks + 1 Lakehouse + 1 Warehouse**
-- **✅ Authentication: DefaultAzureCredential working perfectly**
+- **✅ Authentication: DefaultAzureCredential working effectively**
 - **✅ Deployment time: Under 2 minutes**
 - **✅ Folder structure preserved automatically**
 
-## 🔑 KEY SUCCESS FACTORS
+## 🔑 RECOMMENDED APPROACH
 
 ### 1. Use Simple `publish_all_items()` Function
-**✅ WORKS:** Follow the basic fabric-cicd documentation pattern
+**✅ RECOMMENDED:** Follow the basic fabric-cicd documentation pattern
 ```python
 from fabric_cicd import FabricWorkspace, publish_all_items
 
@@ -29,10 +29,10 @@ workspace = FabricWorkspace(
 result = publish_all_items(workspace)
 ```
 
-**❌ DOESN'T WORK:** Complex parameter.yml configurations, hybrid REST API approaches
+**❌ NOT RECOMMENDED:** Complex parameter.yml configurations, hybrid REST API approaches
 
 ### 2. Let fabric-cicd Handle Subdirectories Natively
-**✅ WORKS:** Repository structure with items in subdirectories
+**✅ RECOMMENDED:** Repository structure with items in subdirectories
 ```
 /<repository-root>
     /<Migration>/
@@ -42,24 +42,22 @@ result = publish_all_items(workspace)
         /analytics_wh.Warehouse
 ```
 
-**❌ DOESN'T WORK:** Flattening structures, manual folder creation via REST API
+**❌ NOT RECOMMENDED:** Flattening structures, manual folder creation via REST API
 
 ### 3. Specify Correct Item Types Based on Repository Analysis
-**✅ WORKS:** Auto-detect item types or specify based on actual content
+**✅ RECOMMENDED:** Auto-detect item types or specify based on actual content
 ```python
 item_types = ["Notebook", "Lakehouse", "Warehouse"]  # Based on repository analysis
-```
-
-**❌ DOESN'T WORK:** Guessing item types, including types not in repository
+**❌ NOT RECOMMENDED:** Guessing item types, including types not in repository
 
 ### 4. Use DefaultAzureCredential
-**✅ WORKS:** Simple, reliable authentication
+**✅ RECOMMENDED:** Simple, reliable authentication
 ```bash
 az login
 # Then run your deployment script
 ```
 
-**❌ DOESN'T WORK:** Complex authentication schemes, manual token management
+**❌ NOT RECOMMENDED:** Complex authentication schemes, manual token management
 
 ## 📁 REPOSITORY STRUCTURE REQUIREMENTS
 
@@ -109,7 +107,7 @@ az account show
 
 ### Step 3: Repository Analysis
 ```bash
-# Use our proven script to analyze your repository
+# Use our script to analyze your repository
 python fabric_cicd_setup.py \
     --workspace-id "your-workspace-id" \
     --repo-url "your-repo-url" \
@@ -118,7 +116,7 @@ python fabric_cicd_setup.py \
 
 ### Step 4: Deployment
 ```bash
-# Deploy using proven working approach
+# Deploy using recommended approach
 python fabric_cicd_setup.py \
     --workspace-id "your-workspace-id" \
     --repo-url "your-repo-url"
@@ -299,7 +297,7 @@ python fabric_cicd_setup.py \
 
 ## 🚀 AZURE DEVOPS INTEGRATION
 
-### Pipeline Configuration (Proven Working)
+### Pipeline Configuration (Tested)
 ```yaml
 trigger:
 - main
@@ -375,4 +373,4 @@ After deployment:
 
 ---
 
-*This guide represents proven, tested solutions that actually work with the fabric-cicd library. Follow these patterns for reliable Fabric CI/CD deployments.*
+*This guide represents tested solutions with the fabric-cicd library. Follow these patterns for reliable Fabric CI/CD deployments.*
