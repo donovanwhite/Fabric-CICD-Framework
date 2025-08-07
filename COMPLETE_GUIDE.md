@@ -108,7 +108,7 @@ az account show
 ### Step 3: Repository Analysis
 ```bash
 # Use our proven script to analyze your repository
-python fabric_cicd_setup.py \
+python fabric_deploy.py \
     --workspace-id "your-workspace-id" \
     --repo-url "your-repo-url" \
     --dry-run
@@ -117,7 +117,7 @@ python fabric_cicd_setup.py \
 ### Step 4: Deployment
 ```bash
 # Deploy using proven working approach
-python fabric_cicd_setup.py \
+python fabric_deploy.py \
     --workspace-id "your-workspace-id" \
     --repo-url "your-repo-url"
 ```
@@ -278,7 +278,7 @@ The example demonstrates a realistic retail analytics platform with:
 ### 📝 **Usage with Parameterization**
 ```bash
 # Deploy with environment-specific parameters
-python fabric_cicd_setup.py \
+python fabric_deploy.py \
     --workspace-id "your-workspace-id" \
     --repo-url "your-repo-url" \
     --environment PROD
@@ -319,7 +319,7 @@ steps:
   displayName: 'Install Dependencies'
 
 - script: |
-    python fabric_cicd_setup.py \
+    python fabric_deploy.py \
       --workspace-id "$(FABRIC_WORKSPACE_ID)" \
       --repo-url "$(Build.Repository.Uri)" \
       --branch "$(Build.SourceBranchName)"

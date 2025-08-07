@@ -9,7 +9,7 @@ This is the **CLEAN, PROVEN WORKING** Microsoft Fabric CI/CD solution. All debug
 ```
 fabric-cicd-solution/
 ├── 🚀 CORE DEPLOYMENT SCRIPTS
-│   ├── fabric_cicd_setup.py            # ✅ MAIN deployment script (PROVEN WORKING)
+│   ├── fabric_deploy.py                # ✅ MAIN deployment script (PROVEN WORKING)
 │   └── fabric_deploy_simple.py         # ✅ Simple deployment alternative
 │
 ├── 🔧 UTILITIES  
@@ -44,7 +44,7 @@ fabric-cicd-solution/
 
 3. **Deploy**
    ```bash
-   python fabric_cicd_setup.py \
+   python fabric_deploy.py \
        --workspace-id "your-workspace-id" \
        --repo-url "your-repo-url"
    ```
@@ -77,7 +77,7 @@ All debug, diagnostic, and legacy files have been cleaned up:
 
 ## 🎯 NEXT STEPS
 
-1. **Use the working solution** - `fabric_cicd_setup.py`
+1. **Use the working solution** - `fabric_deploy.py`
 2. **Follow the comprehensive guide** - `COMPLETE_GUIDE.md` 
 3. **Set up Azure DevOps pipeline** - `azure-pipelines.yml`
 4. **Test with your repository** - `test_hybrid_deployment.bat`

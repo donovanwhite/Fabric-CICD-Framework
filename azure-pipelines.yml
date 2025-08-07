@@ -1,6 +1,6 @@
-# Azure DevOps Pipeline for Microsoft Fabric CI/CD - PROVEN WORKING
+# Azure DevOps Pipeline for Microsoft Fabric CI/CD
 # Based on successful testing with fabric-cicd library
-# This pipeline uses the SIMPLE approach that actually works
+# This pipeline uses the SIMPLE approach
 
 trigger:
 - main
@@ -37,7 +37,7 @@ stages:
 
     - script: |
         echo "🔍 Validating repository structure..."
-        python fabric_cicd_setup.py \
+        python fabric_deploy.py \
           --workspace-id "$(FABRIC_WORKSPACE_ID)" \
           --repo-url "$(REPO_URL)" \
           --branch "$(BRANCH_NAME)" \
@@ -73,12 +73,12 @@ stages:
             displayName: 'Install Dependencies'
 
           - script: |
-              echo "🚀 Deploying Fabric items using PROVEN WORKING approach..."
+              echo "🚀 Deploying Fabric items ..."
               echo "Repository: $(REPO_URL)"
               echo "Branch: $(BRANCH_NAME)" 
               echo "Workspace: $(FABRIC_WORKSPACE_ID)"
               echo ""
-              python fabric_cicd_setup.py \
+              python fabric_deploy.py \
                 --workspace-id "$(FABRIC_WORKSPACE_ID)" \
                 --repo-url "$(REPO_URL)" \
                 --branch "$(BRANCH_NAME)"
@@ -115,7 +115,7 @@ stages:
     - script: |
         echo "🔍 Validating PR changes..."
         echo "This is a Pull Request validation - no deployment will occur"
-        python fabric_cicd_setup.py \
+        python fabric_deploy.py \
           --workspace-id "$(FABRIC_WORKSPACE_ID)" \
           --repo-url "$(REPO_URL)" \
           --branch "$(System.PullRequest.SourceBranch)" \

@@ -36,10 +36,10 @@ TESTED WITH:
 - Result: ✅ ALL ITEMS DEPLOYED SUCCESSFULLY
 
 Usage:
-    python fabric_cicd_setup_working.py --workspace-id <workspace-id> --repo-url <repo-url>
+    python fabric_deploy.py --workspace-id <workspace-id> --repo-url <repo-url>
     
 Example:
-    python fabric_cicd_setup_working.py \
+    python fabric_deploy.py \
         --workspace-id "eb2f7de1-b2d5-4852-a744-735106d8dfe8" \
         --repo-url "https://dev.azure.com/contoso/Project/_git/repo" \
         --branch main
@@ -114,13 +114,13 @@ def main():
         epilog="""
 Examples:
   # Basic deployment
-  python fabric_cicd_setup_working.py --workspace-id "your-workspace-id" --repo-url "https://dev.azure.com/org/proj/_git/repo"
+  python fabric_deploy.py --workspace-id "your-workspace-id" --repo-url "https://dev.azure.com/org/proj/_git/repo"
   
   # With specific branch
-  python fabric_cicd_setup_working.py --workspace-id "your-workspace-id" --repo-url "repo-url" --branch development
+  python fabric_deploy.py --workspace-id "your-workspace-id" --repo-url "repo-url" --branch development
   
   # Dry run (analyze only)
-  python fabric_cicd_setup_working.py --workspace-id "your-workspace-id" --repo-url "repo-url" --dry-run
+  python fabric_deploy.py --workspace-id "your-workspace-id" --repo-url "repo-url" --dry-run
         """
     )
     

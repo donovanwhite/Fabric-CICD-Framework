@@ -65,7 +65,7 @@ For cross-environment deployments with parameterization:
 
 ### 4. Deploy
 ```bash
-python fabric_cicd_setup.py \
+python fabric_deploy.py \
     --workspace-id "your-workspace-id" \
     --repo-url "https://dev.azure.com/org/project/_git/repo"
 ```
@@ -77,7 +77,7 @@ Check your Fabric workspace - all items should be deployed with folder structure
 
 ```
 🚀 CORE DEPLOYMENT SCRIPTS
-├── fabric_cicd_setup.py          # Main deployment script
+├── fabric_deploy.py              # Main deployment script
 └── fabric_deploy_simple.py       # Simple deployment alternative
 
 🔧 UTILITIES
@@ -128,14 +128,14 @@ Our solution was developed through extensive testing:
 
 ### Basic Deployment
 ```bash
-python fabric_cicd_setup.py \
+python fabric_deploy.py \
     --workspace-id "eb2f7de1-b2d5-4852-a744-735106d8dfe8" \
     --repo-url "https://dev.azure.com/contoso/FabricProject/_git/analytics"
 ```
 
 ### With Parameterization
 ```bash
-python fabric_cicd_setup.py \
+python fabric_deploy.py \
     --workspace-id "your-workspace-id" \
     --repo-url "your-repo-url" \
     --environment PROD
@@ -143,7 +143,7 @@ python fabric_cicd_setup.py \
 
 ### Specific Branch
 ```bash
-python fabric_cicd_setup.py \
+python fabric_deploy.py \
     --workspace-id "your-workspace-id" \
     --repo-url "your-repo-url" \
     --branch development
@@ -151,7 +151,7 @@ python fabric_cicd_setup.py \
 
 ### Dry Run (Analysis Only)
 ```bash
-python fabric_cicd_setup.py \
+python fabric_deploy.py \
     --workspace-id "your-workspace-id" \
     --repo-url "your-repo-url" \
     --dry-run
@@ -159,7 +159,7 @@ python fabric_cicd_setup.py \
 
 ### Specific Item Types
 ```bash
-python fabric_cicd_setup.py \
+python fabric_deploy.py \
     --workspace-id "your-workspace-id" \
     --repo-url "your-repo-url" \
     --item-types Notebook Lakehouse
