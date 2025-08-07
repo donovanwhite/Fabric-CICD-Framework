@@ -1,0 +1,127 @@
+# Azure DevOps Pipeline for Microsoft Fabric CI/CD - PROVEN WORKING
+# Based on successful testing with fabric-cicd library
+# This pipeline uses the SIMPLE approach that actually works
+
+trigger:
+- main
+- develop
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  # Fabric Configuration
+  FABRIC_WORKSPACE_ID: 'eb2f7de1-b2d5-4852-a744-735106d8dfe8'  # Replace with your workspace ID
+  PYTHON_VERSION: '3.11'
+  
+  # Repository Configuration (automatically populated by Azure DevOps)
+  REPO_URL: $(Build.Repository.Uri)
+  BRANCH_NAME: $(Build.SourceBranchName)
+
+stages:
+- stage: Validate
+  displayName: 'Validate Repository'
+  jobs:
+  - job: ValidateRepo
+    displayName: 'Validate Repository Structure'
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: $(PYTHON_VERSION)
+      displayName: 'Setup Python $(PYTHON_VERSION)'
+
+    - script: |
+        python -m pip install --upgrade pip
+        pip install fabric-cicd GitPython azure-identity
+      displayName: 'Install Dependencies'
+
+    - script: |
+        echo "🔍 Validating repository structure..."
+        python fabric_cicd_setup.py \
+          --workspace-id "$(FABRIC_WORKSPACE_ID)" \
+          --repo-url "$(REPO_URL)" \
+          --branch "$(BRANCH_NAME)" \
+          --dry-run
+      displayName: 'Dry Run - Validate Repository'
+      env:
+        AZURE_CLIENT_ID: $(AZURE_CLIENT_ID)
+        AZURE_CLIENT_SECRET: $(AZURE_CLIENT_SECRET)
+        AZURE_TENANT_ID: $(AZURE_TENANT_ID)
+
+- stage: Deploy
+  displayName: 'Deploy to Fabric'
+  dependsOn: Validate
+  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+  jobs:
+  - deployment: DeployFabricItems
+    displayName: 'Deploy Fabric Items'
+    environment: 'Fabric-Production'  # Create this environment in Azure DevOps
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - checkout: self
+          
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: $(PYTHON_VERSION)
+            displayName: 'Setup Python $(PYTHON_VERSION)'
+
+          - script: |
+              python -m pip install --upgrade pip
+              pip install fabric-cicd GitPython azure-identity
+            displayName: 'Install Dependencies'
+
+          - script: |
+              echo "🚀 Deploying Fabric items using PROVEN WORKING approach..."
+              echo "Repository: $(REPO_URL)"
+              echo "Branch: $(BRANCH_NAME)" 
+              echo "Workspace: $(FABRIC_WORKSPACE_ID)"
+              echo ""
+              python fabric_cicd_setup.py \
+                --workspace-id "$(FABRIC_WORKSPACE_ID)" \
+                --repo-url "$(REPO_URL)" \
+                --branch "$(BRANCH_NAME)"
+            displayName: 'Deploy Fabric Items'
+            env:
+              AZURE_CLIENT_ID: $(AZURE_CLIENT_ID)
+              AZURE_CLIENT_SECRET: $(AZURE_CLIENT_SECRET)
+              AZURE_TENANT_ID: $(AZURE_TENANT_ID)
+
+          - script: |
+              echo "✅ Deployment completed!"
+              echo "🎉 Check your Fabric workspace to verify the deployment."
+              echo "📊 Workspace ID: $(FABRIC_WORKSPACE_ID)"
+            displayName: 'Deployment Summary'
+
+# Development/Pull Request Pipeline
+- stage: ValidatePR
+  displayName: 'Validate Pull Request'
+  condition: eq(variables['Build.Reason'], 'PullRequest')
+  jobs:
+  - job: ValidatePRChanges
+    displayName: 'Validate PR Changes'
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: $(PYTHON_VERSION)
+      displayName: 'Setup Python $(PYTHON_VERSION)'
+
+    - script: |
+        python -m pip install --upgrade pip
+        pip install fabric-cicd GitPython azure-identity
+      displayName: 'Install Dependencies'
+
+    - script: |
+        echo "🔍 Validating PR changes..."
+        echo "This is a Pull Request validation - no deployment will occur"
+        python fabric_cicd_setup.py \
+          --workspace-id "$(FABRIC_WORKSPACE_ID)" \
+          --repo-url "$(REPO_URL)" \
+          --branch "$(System.PullRequest.SourceBranch)" \
+          --dry-run
+      displayName: 'Validate PR Changes (Dry Run)'
+      env:
+        AZURE_CLIENT_ID: $(AZURE_CLIENT_ID)
+        AZURE_CLIENT_SECRET: $(AZURE_CLIENT_SECRET)
+        AZURE_TENANT_ID: $(AZURE_TENANT_ID)
