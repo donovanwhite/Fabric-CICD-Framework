@@ -31,36 +31,44 @@ def check_python_version():
         return True
 
 def check_fabric_cicd_version():
-    """Check if fabric-cicd version is compatible"""
+    """Check if fabric-cicd is installed and functional"""
     print("\n🔍 Checking fabric-cicd...")
     
     try:
         import fabric_cicd
-        current_version = fabric_cicd.__version__
-        print(f"   Current fabric-cicd: {current_version}")
         
-        try:
-            from packaging import version
-            required_version = "0.1.24"
-            
-            if version.parse(current_version) >= version.parse(required_version):
-                print("✅ fabric-cicd version compatible")
-                
-                # Show supported item types for this version
-                print(f"   Supports all 19 item types in version {current_version}")
-                return True
-            else:
-                print("❌ fabric-cicd version incompatible")
-                print(f"   Required: {required_version} or higher")
-                print("💡 Upgrade with: pip install --upgrade fabric-cicd")
-                return False
-                
-        except ImportError:
-            print("⚠️  Cannot verify exact version (packaging module not available)")
-            print("💡 Install packaging: pip install packaging")
-            print("✅ fabric-cicd is available (assuming compatible)")
-            return True
-            
+        # Try different ways to get the version
+        current_version = None
+        
+        # Method 1: Direct __version__ attribute
+        if hasattr(fabric_cicd, '__version__'):
+            current_version = fabric_cicd.__version__
+        
+        # Method 2: Using importlib.metadata (Python 3.8+)
+        if not current_version:
+            try:
+                import importlib.metadata
+                current_version = importlib.metadata.version('fabric-cicd')
+            except Exception:
+                pass
+        
+        # Method 3: Using pkg_resources (fallback)
+        if not current_version:
+            try:
+                import pkg_resources
+                current_version = pkg_resources.get_distribution('fabric-cicd').version
+            except Exception:
+                pass
+        
+        # Report status regardless of version - using latest version approach
+        if current_version:
+            print(f"✅ fabric-cicd version {current_version} installed")
+        else:
+            print("✅ fabric-cicd installed and importable (version not detectable)")
+        
+        print("   Using latest version approach - setup always installs newest version")
+        return True
+        
     except ImportError:
         print("❌ fabric-cicd not installed")
         print("💡 Install with: pip install fabric-cicd")

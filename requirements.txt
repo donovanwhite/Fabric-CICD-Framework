@@ -3,8 +3,9 @@
 # IMPORTANT: fabric-cicd requires Python >=3.8 and <3.13
 # This framework requires fabric-cicd v0.1.24+ for full item type support
 
-# Core fabric-cicd library for Microsoft Fabric deployments (minimum v0.1.24)
-fabric-cicd>=0.1.24
+# Core fabric-cicd library for Microsoft Fabric deployments
+# Always install latest version for best compatibility
+fabric-cicd
 
 # Azure authentication
 azure-identity>=1.15.0

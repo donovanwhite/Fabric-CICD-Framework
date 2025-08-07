@@ -10,6 +10,13 @@ if %errorlevel% neq 0 (
 )
 
 echo ✅ Environment activated: fabric-cicd
+echo.
+
+REM Run compatibility check
+echo 🔍 Running compatibility check...
+python check_compatibility.py
+echo.
+
 echo 💡 You can now run: python fabric_deploy.py --help
 echo.
 

@@ -12,21 +12,65 @@ echo.
 
 REM Check if conda is available
 where conda >nul 2>&1
-if %errorlevel% neq 0 (
-    echo ❌ Conda not found in PATH
-    echo 💡 Please install Anaconda or Miniconda first:
-    echo    https://docs.anaconda.com/miniconda/
-    pause
-    exit /b 1
+if %errorlevel% equ 0 (
+    echo ✅ Conda found in PATH
+    set "CONDA_CMD=conda"
+    goto :CONDA_FOUND
 )
 
-echo ✅ Conda found in PATH
-conda --version
+REM If not in PATH, check common installation locations
+echo 🔍 Conda not in PATH, checking common installation locations...
+
+if exist "C:\ProgramData\Anaconda3\Scripts\conda.exe" (
+    echo ✅ Found Anaconda at C:\ProgramData\Anaconda3
+    set "CONDA_CMD=C:\ProgramData\Anaconda3\Scripts\conda.exe"
+    set "PATH=C:\ProgramData\Anaconda3\Scripts;C:\ProgramData\Anaconda3\condabin;%PATH%"
+    goto :CONDA_FOUND
+)
+
+if exist "C:\ProgramData\Miniconda3\Scripts\conda.exe" (
+    echo ✅ Found Miniconda at C:\ProgramData\Miniconda3
+    set "CONDA_CMD=C:\ProgramData\Miniconda3\Scripts\conda.exe"
+    set "PATH=C:\ProgramData\Miniconda3\Scripts;C:\ProgramData\Miniconda3\condabin;%PATH%"
+    goto :CONDA_FOUND
+)
+
+if exist "%USERPROFILE%\anaconda3\Scripts\conda.exe" (
+    echo ✅ Found Anaconda at %USERPROFILE%\anaconda3
+    set "CONDA_CMD=%USERPROFILE%\anaconda3\Scripts\conda.exe"
+    set "PATH=%USERPROFILE%\anaconda3\Scripts;%USERPROFILE%\anaconda3\condabin;%PATH%"
+    goto :CONDA_FOUND
+)
+
+if exist "%USERPROFILE%\Anaconda3\Scripts\conda.exe" (
+    echo ✅ Found Anaconda at %USERPROFILE%\Anaconda3
+    set "CONDA_CMD=%USERPROFILE%\Anaconda3\Scripts\conda.exe"
+    set "PATH=%USERPROFILE%\Anaconda3\Scripts;%USERPROFILE%\Anaconda3\condabin;%PATH%"
+    goto :CONDA_FOUND
+)
+
+if exist "%USERPROFILE%\miniconda3\Scripts\conda.exe" (
+    echo ✅ Found Miniconda at %USERPROFILE%\miniconda3
+    set "CONDA_CMD=%USERPROFILE%\miniconda3\Scripts\conda.exe"
+    set "PATH=%USERPROFILE%\miniconda3\Scripts;%USERPROFILE%\miniconda3\condabin;%PATH%"
+    goto :CONDA_FOUND
+)
+
+echo ❌ Conda not found in PATH or common locations
+echo 💡 Please install Anaconda or Miniconda first:
+echo    https://docs.anaconda.com/miniconda/
+echo 💡 Or add conda to your PATH environment variable
+pause
+exit /b 1
+
+:CONDA_FOUND
+echo ✅ Using conda at: %CONDA_CMD%
+"%CONDA_CMD%" --version
 
 REM Check if Python 3.12 is available
 echo.
 echo 🔍 Checking Python availability...
-conda search python=3.12* -c conda-forge >nul 2>&1
+"%CONDA_CMD%" search python=3.12* -c conda-forge >nul 2>&1
 if %errorlevel% neq 0 (
     echo ⚠️  Python 3.12 not available from conda-forge, will use default Python
     set PYTHON_VERSION=3.11
@@ -45,14 +89,14 @@ echo    Python version: %PYTHON_VERSION%
 echo.
 
 REM Check if environment already exists
-conda info --envs | findstr "%ENV_NAME%" >nul 2>&1
+"%CONDA_CMD%" info --envs | findstr "%ENV_NAME%" >nul 2>&1
 if %errorlevel% equ 0 (
     echo ⚠️  Environment '%ENV_NAME%' already exists
     echo.
     set /p "RECREATE=Do you want to recreate it? This will delete the existing environment (y/N): "
     if /i "!RECREATE!"=="y" (
         echo 🗑️  Removing existing environment...
-        conda env remove -n %ENV_NAME% -y
+        "%CONDA_CMD%" env remove -n %ENV_NAME% -y
         if %errorlevel% neq 0 (
             echo ❌ Failed to remove existing environment
             pause
@@ -65,7 +109,7 @@ if %errorlevel% equ 0 (
 )
 
 echo 🔨 Creating conda environment...
-conda create -n %ENV_NAME% python=%PYTHON_VERSION% -y
+"%CONDA_CMD%" create -n %ENV_NAME% python=%PYTHON_VERSION% -y
 if %errorlevel% neq 0 (
     echo ❌ Failed to create conda environment
     pause
@@ -77,10 +121,26 @@ echo ✅ Conda environment created successfully
 :ACTIVATE_ENV
 echo.
 echo 🔄 Activating environment...
-call conda activate %ENV_NAME%
+
+REM Initialize conda for this session if needed
+echo 🔧 Initializing conda for current session...
+call "%CONDA_CMD%" init cmd.exe --no-user >nul 2>&1
+
+REM Set up conda activation in current session
+for /f "tokens=*" %%i in ('"%CONDA_CMD%" info --base') do set CONDA_BASE=%%i
+if exist "%CONDA_BASE%\Scripts\activate.bat" (
+    call "%CONDA_BASE%\Scripts\activate.bat" %ENV_NAME%
+) else (
+    REM Alternative activation method
+    call "%CONDA_CMD%" activate %ENV_NAME%
+)
+
 if %errorlevel% neq 0 (
     echo ❌ Failed to activate conda environment
-    echo 💡 Try running: conda activate %ENV_NAME%
+    echo 💡 Manual activation required. Please run:
+    echo    conda activate %ENV_NAME%
+    echo    OR
+    echo    Open an Anaconda Prompt and run this script again
     pause
     exit /b 1
 )
@@ -130,32 +190,29 @@ if %errorlevel% neq 0 (
 
 python -c "import sys; print(f'✅ Python version compatible: {sys.version.split()[0]}')"
 
-REM Verify fabric-cicd version
+REM Install/upgrade fabric-cicd to latest version
 echo.
-echo 🔍 Verifying fabric-cicd version...
-python -c "import fabric_cicd; from packaging import version; required = '0.1.24'; current = fabric_cicd.__version__; exit(0 if version.parse(current) >= version.parse(required) else 1)" 2>nul
+echo � Installing latest fabric-cicd version...
+pip install --upgrade fabric-cicd
 if %errorlevel% neq 0 (
-    echo ❌ fabric-cicd version incompatible or not installed properly
-    echo 💡 This framework requires fabric-cicd version 0.1.24 or higher
-    echo 🔧 Installing/upgrading to latest fabric-cicd...
-    pip install --upgrade fabric-cicd
-    if %errorlevel% neq 0 (
-        echo ❌ Failed to upgrade fabric-cicd
-        pause
-        exit /b 1
-    )
-    REM Verify again after upgrade
-    python -c "import fabric_cicd; from packaging import version; required = '0.1.24'; current = fabric_cicd.__version__; exit(0 if version.parse(current) >= version.parse(required) else 1)" 2>nul
-    if %errorlevel% neq 0 (
-        echo ❌ fabric-cicd version still incompatible after upgrade
-        python -c "import fabric_cicd; print(f'Current version: {fabric_cicd.__version__}')" 2>nul
-        echo 💡 Required version: 0.1.24 or higher
-        pause
-        exit /b 1
-    )
+    echo ❌ Failed to install fabric-cicd
+    echo 💡 Check the error messages above
+    pause
+    exit /b 1
 )
 
-python -c "import fabric_cicd; print(f'✅ fabric-cicd version compatible: {fabric_cicd.__version__}')"
+REM Verify fabric-cicd installation
+echo.
+echo 🔍 Verifying fabric-cicd installation...
+python -c "import fabric_cicd; print(f'✅ fabric-cicd installed successfully')" 2>nul
+if %errorlevel% neq 0 (
+    echo ❌ fabric-cicd import failed
+    echo 💡 Check the installation error messages above
+    pause
+    exit /b 1
+)
+
+echo ✅ fabric-cicd is ready for use
 
 REM Verify installation
 echo.
@@ -186,11 +243,11 @@ if not exist ".vscode" mkdir .vscode
 echo Creating VS Code settings.json...
 (
 echo {
-echo     "python.pythonPath": "conda run -n %ENV_NAME% python",
+echo     "python.pythonPath": "%CONDA_CMD% run -n %ENV_NAME% python",
 echo     "python.terminal.activateEnvironment": true,
 echo     "python.terminal.activateEnvInCurrentTerminal": true,
-echo     "python.condaPath": "conda",
-echo     "python.defaultInterpreterPath": "conda run -n %ENV_NAME% python",
+echo     "python.condaPath": "%CONDA_CMD%",
+echo     "python.defaultInterpreterPath": "%CONDA_CMD% run -n %ENV_NAME% python",
 echo     "python.envFile": "${workspaceFolder}/.env",
 echo     "files.associations": {
 echo         "*.yml": "yaml",
@@ -203,7 +260,7 @@ echo     "terminal.integrated.defaultProfile.windows": "Command Prompt",
 echo     "terminal.integrated.profiles.windows": {
 echo         "Fabric CICD Environment": {
 echo             "path": "cmd.exe",
-echo             "args": ["/k", "conda activate %ENV_NAME%"],
+echo             "args": ["/k", "\"%CONDA_CMD%\" activate %ENV_NAME%"],
 echo             "icon": "terminal-cmd"
 echo         }
 echo     }
@@ -219,10 +276,23 @@ echo 📝 Creating activation script...
 echo @echo off
 echo REM Quick activation script for Fabric CICD environment
 echo echo 🔄 Activating Fabric CICD environment...
-echo call conda activate %ENV_NAME%
+echo.
+echo REM Initialize conda if needed
+echo call "%CONDA_CMD%" init cmd.exe --no-user ^>nul 2^>^&1
+echo.
+echo REM Activate environment
+echo call "%CONDA_CMD%" activate %ENV_NAME%
+echo if %%errorlevel%% neq 0 ^(
+echo     echo ❌ Failed to activate environment 'fabric-cicd'
+echo     echo 💡 Try opening an Anaconda Prompt and running:
+echo     echo    conda activate %ENV_NAME%
+echo     pause
+echo     exit /b 1
+echo ^)
 echo echo ✅ Environment activated: %ENV_NAME%
 echo echo 💡 You can now run: python fabric_deploy.py --help
 echo echo.
+echo cmd /k
 ) > activate_fabric_env.bat
 
 echo ✅ Created activate_fabric_env.bat
@@ -267,6 +337,12 @@ echo    1. Close and reopen VS Code to apply settings
 echo    2. Use Ctrl+Shift+P ^> "Python: Select Interpreter" 
 echo    3. Choose the Fabric CICD environment
 echo    4. Test deployment: python fabric_deploy.py --help
+echo.
+echo 💡 Alternative: Use Anaconda Prompt
+echo    • Open "Anaconda Prompt" from Start Menu
+echo    • Navigate to: cd "%CD%"
+echo    • Activate environment: conda activate %ENV_NAME%
+echo    • Run deployment: python fabric_deploy.py --help
 echo.
 echo 💡 Quick commands:
 echo    • Activate environment: activate_fabric_env.bat
