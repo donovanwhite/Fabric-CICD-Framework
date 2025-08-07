@@ -20,6 +20,10 @@ fabric_deploy_devops*.py
 test_*.bat
 debug_*.bat
 
+# IMPORTANT: Do NOT ignore these setup files
+!setup.bat
+!activate_fabric_env.bat
+
 # VS Code and IDE files
 .vscode/
 *.code-workspace

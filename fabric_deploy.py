@@ -57,11 +57,46 @@ try:
     from git import Repo
     from azure.identity import DefaultAzureCredential
     from fabric_cicd import FabricWorkspace, publish_all_items
+    import fabric_cicd
 except ImportError as e:
     print(f"❌ Missing required dependency: {e}")
     print("📦 Please install required packages:")
     print("   pip install fabric-cicd GitPython azure-identity")
     sys.exit(1)
+
+def check_version_compatibility():
+    """Check Python and fabric-cicd version compatibility"""
+    
+    # Check Python version
+    if sys.version_info < (3, 8):
+        print("❌ Python version incompatible")
+        print(f"   Current: {sys.version.split()[0]}")
+        print("   Required: Python 3.8 or higher")
+        print("💡 Please upgrade Python or use a compatible environment")
+        sys.exit(1)
+    
+    # Check fabric-cicd version
+    try:
+        from packaging import version
+        required_version = "0.1.24"
+        current_version = fabric_cicd.__version__
+        
+        if version.parse(current_version) < version.parse(required_version):
+            print("❌ fabric-cicd version incompatible")
+            print(f"   Current: {current_version}")
+            print(f"   Required: {required_version} or higher")
+            print("💡 Please upgrade: pip install --upgrade fabric-cicd")
+            sys.exit(1)
+            
+        print(f"✅ Version check passed - fabric-cicd {current_version}")
+        
+    except ImportError:
+        print("⚠️  Warning: Cannot verify fabric-cicd version (packaging module not available)")
+        print("💡 Consider installing: pip install packaging")
+        
+    except Exception as e:
+        print(f"⚠️  Warning: Version check failed: {e}")
+        print("💡 Continuing with deployment attempt...")
 
 def analyze_repository(repo_path):
     """
@@ -136,6 +171,9 @@ Examples:
                        help='Specific item types to deploy (auto-detected if not specified)')
     
     args = parser.parse_args()
+    
+    # Check version compatibility first
+    check_version_compatibility()
     
     # Create temporary directory for repository
     temp_dir = tempfile.mkdtemp(prefix='fabric_cicd_')
