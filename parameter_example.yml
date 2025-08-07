@@ -1,0 +1,516 @@
+# Microsoft Fabric CICD Parameter Configuration - EXAMPLE WITH ACTUAL VALUES
+# =========================================================================
+# This is a complete example showing actual parameter values for reference
+# Compatible with fabric-cicd library v0.1.24 and all supported item types
+# 
+# Usage: Use this as a reference to create your own parameter.yml
+# Replace example values with your actual environment-specific values
+#
+# Environments: DEV, UAT, PROD
+# Project: RetailAnalytics - Modern Data Platform
+
+# =============================================================================
+# FIND AND REPLACE PARAMETERIZATION - REAL EXAMPLES
+# =============================================================================
+
+find_replace:
+  # =============================================================================
+  # NOTEBOOK PARAMETERIZATION - ACTUAL VALUES
+  # =============================================================================
+  
+  # Replace workspace IDs in notebooks (common pattern in notebook metadata)
+  - find_value: "eb2f7de1-b2d5-4852-a744-735106d8dfe8"
+    replace_value:
+      DEV: "$workspace.id"
+      UAT: "$workspace.id"
+      PROD: "$workspace.id"
+    item_type: "Notebook"
+    file_path: "**/notebook-content.py"
+
+  # Replace actual lakehouse ID in notebooks
+  - find_value: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+    replace_value:
+      DEV: "$items.Lakehouse.RetailDataLake.id"
+      UAT: "$items.Lakehouse.RetailDataLake.id"
+      PROD: "$items.Lakehouse.RetailDataLake.id"
+    item_type: "Notebook"
+
+  # Replace actual warehouse ID in notebooks
+  - find_value: "f9e8d7c6-b5a4-3210-9876-543210fedcba"
+    replace_value:
+      DEV: "$items.Warehouse.RetailWarehouse.id"
+      UAT: "$items.Warehouse.RetailWarehouse.id"
+      PROD: "$items.Warehouse.RetailWarehouse.id"
+    item_type: "Notebook"
+
+  # Replace SQL Server connection strings in notebooks
+  - find_value: "contoso-dev-sql.database.windows.net"
+    replace_value:
+      DEV: "contoso-dev-sql.database.windows.net"
+      UAT: "contoso-uat-sql.database.windows.net"
+      PROD: "contoso-prod-sql.database.windows.net"
+    item_type: "Notebook"
+
+  # Replace Azure Storage account names in notebooks
+  - find_value: "contosodevdatalake.dfs.core.windows.net"
+    replace_value:
+      DEV: "contosodevdatalake.dfs.core.windows.net"
+      UAT: "contosouatdatalake.dfs.core.windows.net"
+      PROD: "contosoproddatalake.dfs.core.windows.net"
+    item_type: "Notebook"
+
+  # Replace API endpoints in notebooks
+  - find_value: "https://api-dev.contoso.com/retail/v1"
+    replace_value:
+      DEV: "https://api-dev.contoso.com/retail/v1"
+      UAT: "https://api-uat.contoso.com/retail/v1"
+      PROD: "https://api.contoso.com/retail/v1"
+    item_type: "Notebook"
+
+  # =============================================================================
+  # DATA PIPELINE PARAMETERIZATION - ACTUAL VALUES
+  # =============================================================================
+
+  # Replace source database server in pipelines
+  - find_value: "retail-source-dev.database.windows.net"
+    replace_value:
+      DEV: "retail-source-dev.database.windows.net"
+      UAT: "retail-source-uat.database.windows.net"
+      PROD: "retail-source-prod.database.windows.net"
+    item_type: "DataPipeline"
+
+  # Replace specific database names in pipelines
+  - find_value: "RetailTransactionsDB_Dev"
+    replace_value:
+      DEV: "RetailTransactionsDB_Dev"
+      UAT: "RetailTransactionsDB_UAT"
+      PROD: "RetailTransactionsDB_Prod"
+    item_type: "DataPipeline"
+
+  # Replace FTP/SFTP endpoints in pipelines
+  - find_value: "ftp://vendor-dev.retailpartner.com/exports"
+    replace_value:
+      DEV: "ftp://vendor-dev.retailpartner.com/exports"
+      UAT: "ftp://vendor-uat.retailpartner.com/exports"
+      PROD: "ftp://vendor.retailpartner.com/exports"
+    item_type: "DataPipeline"
+
+  # Replace specific lakehouse reference in pipelines
+  - find_value: "12345678-abcd-ef12-3456-789012345678"
+    replace_value:
+      DEV: "$items.Lakehouse.RawDataLake.id"
+      UAT: "$items.Lakehouse.RawDataLake.id"
+      PROD: "$items.Lakehouse.RawDataLake.id"
+    item_type: "DataPipeline"
+
+  # =============================================================================
+  # ENVIRONMENT PARAMETERIZATION - ACTUAL VALUES
+  # =============================================================================
+
+  # Replace Python package repositories
+  - find_value: "https://pkgs.dev.azure.com/contoso/retail/_packaging/dev-feed/pypi/simple/"
+    replace_value:
+      DEV: "https://pkgs.dev.azure.com/contoso/retail/_packaging/dev-feed/pypi/simple/"
+      UAT: "https://pkgs.dev.azure.com/contoso/retail/_packaging/uat-feed/pypi/simple/"
+      PROD: "https://pkgs.dev.azure.com/contoso/retail/_packaging/prod-feed/pypi/simple/"
+    item_type: "Environment"
+
+  # Replace custom library paths
+  - find_value: "/mnt/customlibs/dev"
+    replace_value:
+      DEV: "/mnt/customlibs/dev"
+      UAT: "/mnt/customlibs/uat"
+      PROD: "/mnt/customlibs/prod"
+    item_type: "Environment"
+
+  # Replace Spark configuration
+  - find_value: "spark.executor.memory=2g"
+    replace_value:
+      DEV: "spark.executor.memory=2g"
+      UAT: "spark.executor.memory=4g"
+      PROD: "spark.executor.memory=8g"
+    item_type: "Environment"
+
+  # =============================================================================
+  # SEMANTIC MODEL PARAMETERIZATION - ACTUAL VALUES
+  # =============================================================================
+
+  # Replace warehouse connection in semantic models
+  - find_value: "retail-warehouse-dev.datawarehouse.fabric.microsoft.com"
+    replace_value:
+      DEV: "retail-warehouse-dev.datawarehouse.fabric.microsoft.com"
+      UAT: "retail-warehouse-uat.datawarehouse.fabric.microsoft.com"
+      PROD: "retail-warehouse-prod.datawarehouse.fabric.microsoft.com"
+    item_type: "SemanticModel"
+
+  # Replace external SQL Server in semantic models
+  - find_value: "external-analytics-dev.database.windows.net"
+    replace_value:
+      DEV: "external-analytics-dev.database.windows.net"
+      UAT: "external-analytics-uat.database.windows.net"
+      PROD: "external-analytics-prod.database.windows.net"
+    item_type: "SemanticModel"
+
+  # Replace specific warehouse ID in semantic models
+  - find_value: "87654321-dcba-4321-8765-432187654321"
+    replace_value:
+      DEV: "$items.Warehouse.AnalyticsWarehouse.id"
+      UAT: "$items.Warehouse.AnalyticsWarehouse.id"
+      PROD: "$items.Warehouse.AnalyticsWarehouse.id"
+    item_type: "SemanticModel"
+
+  # =============================================================================
+  # REPORT PARAMETERIZATION - ACTUAL VALUES
+  # =============================================================================
+
+  # Replace dataset ID in reports
+  - find_value: "11223344-5566-7788-99aa-bbccddeeff00"
+    replace_value:
+      DEV: "$items.SemanticModel.RetailDataset.id"
+      UAT: "$items.SemanticModel.RetailDataset.id"
+      PROD: "$items.SemanticModel.RetailDataset.id"
+    item_type: "Report"
+
+  # Replace report-specific data source
+  - find_value: "report-warehouse-dev.datawarehouse.fabric.microsoft.com"
+    replace_value:
+      DEV: "report-warehouse-dev.datawarehouse.fabric.microsoft.com"
+      UAT: "report-warehouse-uat.datawarehouse.fabric.microsoft.com"
+      PROD: "report-warehouse-prod.datawarehouse.fabric.microsoft.com"
+    item_type: "Report"
+
+  # =============================================================================
+  # LAKEHOUSE PARAMETERIZATION - ACTUAL VALUES
+  # =============================================================================
+
+  # Replace ADLS Gen2 connection in lakehouses
+  - find_value: "retaildevadls.dfs.core.windows.net"
+    replace_value:
+      DEV: "retaildevadls.dfs.core.windows.net"
+      UAT: "retailuatadls.dfs.core.windows.net"
+      PROD: "retailprodadls.dfs.core.windows.net"
+    item_type: "Lakehouse"
+
+  # Replace OneLake paths
+  - find_value: "/onelake/dev-workspace/raw-data"
+    replace_value:
+      DEV: "/onelake/dev-workspace/raw-data"
+      UAT: "/onelake/uat-workspace/raw-data"
+      PROD: "/onelake/prod-workspace/raw-data"
+    item_type: "Lakehouse"
+
+  # =============================================================================
+  # WAREHOUSE PARAMETERIZATION - ACTUAL VALUES
+  # =============================================================================
+
+  # Replace SQL endpoint URLs
+  - find_value: "retailwarehouse-dev.datawarehouse.fabric.microsoft.com"
+    replace_value:
+      DEV: "retailwarehouse-dev.datawarehouse.fabric.microsoft.com"
+      UAT: "retailwarehouse-uat.datawarehouse.fabric.microsoft.com"
+      PROD: "retailwarehouse-prod.datawarehouse.fabric.microsoft.com"
+    item_type: "Warehouse"
+
+  # Replace external data source connections
+  - find_value: "external-dwh-dev.synapse.sql.azuresynapse.net"
+    replace_value:
+      DEV: "external-dwh-dev.synapse.sql.azuresynapse.net"
+      UAT: "external-dwh-uat.synapse.sql.azuresynapse.net"
+      PROD: "external-dwh-prod.synapse.sql.azuresynapse.net"
+    item_type: "Warehouse"
+
+  # =============================================================================
+  # EVENTHOUSE PARAMETERIZATION - ACTUAL VALUES
+  # =============================================================================
+
+  # Replace Event Hub connection strings
+  - find_value: "Endpoint=sb://retail-events-dev.servicebus.windows.net/"
+    replace_value:
+      DEV: "Endpoint=sb://retail-events-dev.servicebus.windows.net/"
+      UAT: "Endpoint=sb://retail-events-uat.servicebus.windows.net/"
+      PROD: "Endpoint=sb://retail-events-prod.servicebus.windows.net/"
+    item_type: "Eventhouse"
+
+  # Replace IoT Hub endpoints
+  - find_value: "retail-iot-dev.azure-devices.net"
+    replace_value:
+      DEV: "retail-iot-dev.azure-devices.net"
+      UAT: "retail-iot-uat.azure-devices.net"
+      PROD: "retail-iot-prod.azure-devices.net"
+    item_type: "Eventhouse"
+
+  # =============================================================================
+  # KQL DATABASE PARAMETERIZATION - ACTUAL VALUES
+  # =============================================================================
+
+  # Replace specific eventhouse ID
+  - find_value: "aabbccdd-eeff-1122-3344-556677889900"
+    replace_value:
+      DEV: "$items.Eventhouse.RetailEventhouse.id"
+      UAT: "$items.Eventhouse.RetailEventhouse.id"
+      PROD: "$items.Eventhouse.RetailEventhouse.id"
+    item_type: "KQLDatabase"
+
+  # Replace cluster endpoints
+  - find_value: "https://retail-kusto-dev.eastus2.kusto.fabric.microsoft.com"
+    replace_value:
+      DEV: "https://retail-kusto-dev.eastus2.kusto.fabric.microsoft.com"
+      UAT: "https://retail-kusto-uat.westus2.kusto.fabric.microsoft.com"
+      PROD: "https://retail-kusto-prod.centralus.kusto.fabric.microsoft.com"
+    item_type: "KQLDatabase"
+
+  # =============================================================================
+  # EVENTSTREAM PARAMETERIZATION - ACTUAL VALUES
+  # =============================================================================
+
+  # Replace Event Hub connection string
+  - find_value: "Endpoint=sb://retailstream-dev.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=DEV_KEY_HERE"
+    replace_value:
+      DEV: "Endpoint=sb://retailstream-dev.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=DEV_KEY_HERE"
+      UAT: "Endpoint=sb://retailstream-uat.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=UAT_KEY_HERE"
+      PROD: "Endpoint=sb://retailstream-prod.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=PROD_KEY_HERE"
+    item_type: "Eventstream"
+
+  # Replace destination lakehouse
+  - find_value: "99887766-5544-3322-1100-ffeeddccbbaa"
+    replace_value:
+      DEV: "$items.Lakehouse.StreamingLakehouse.id"
+      UAT: "$items.Lakehouse.StreamingLakehouse.id"
+      PROD: "$items.Lakehouse.StreamingLakehouse.id"
+    item_type: "Eventstream"
+
+  # =============================================================================
+  # DATAFLOW PARAMETERIZATION - ACTUAL VALUES
+  # =============================================================================
+
+  # Replace source SQL Server in dataflows
+  - find_value: "erp-source-dev.database.windows.net"
+    replace_value:
+      DEV: "erp-source-dev.database.windows.net"
+      UAT: "erp-source-uat.database.windows.net"
+      PROD: "erp-source-prod.database.windows.net"
+    item_type: "Dataflow"
+
+  # Replace SharePoint Online URLs
+  - find_value: "https://contoso-dev.sharepoint.com/sites/retaildata"
+    replace_value:
+      DEV: "https://contoso-dev.sharepoint.com/sites/retaildata"
+      UAT: "https://contoso-uat.sharepoint.com/sites/retaildata"
+      PROD: "https://contoso.sharepoint.com/sites/retaildata"
+    item_type: "Dataflow"
+
+  # =============================================================================
+  # ADVANCED REGEX EXAMPLES - ACTUAL PATTERNS
+  # =============================================================================
+
+  # Replace GUID patterns in notebook metadata
+  - find_value: '\#\s*META\s+"default_lakehouse":\s*"([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})"'
+    replace_value:
+      DEV: '$items.Lakehouse.MainLakehouse.id'
+      UAT: '$items.Lakehouse.MainLakehouse.id'
+      PROD: '$items.Lakehouse.MainLakehouse.id'
+    is_regex: "true"
+    item_type: "Notebook"
+    file_path: "**/notebook-content.py"
+
+  # Replace workspace GUID in notebook metadata
+  - find_value: '\#\s*META\s+"default_lakehouse_workspace_id":\s*"([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})"'
+    replace_value:
+      DEV: '$workspace.id'
+      UAT: '$workspace.id'
+      PROD: '$workspace.id'
+    is_regex: "true"
+    item_type: "Notebook"
+
+  # Replace connection strings with actual tokens
+  - find_value: 'DefaultEndpointsProtocol=https;AccountName=[a-zA-Z0-9]+dev[a-zA-Z0-9]*;'
+    replace_value:
+      DEV: 'DefaultEndpointsProtocol=https;AccountName=retaildevadls;'
+      UAT: 'DefaultEndpointsProtocol=https;AccountName=retailuatadls;'
+      PROD: 'DefaultEndpointsProtocol=https;AccountName=retailprodadls;'
+    is_regex: "true"
+    item_type: ["Notebook", "DataPipeline", "Dataflow"]
+
+# =============================================================================
+# KEY-VALUE REPLACEMENT PARAMETERIZATION - REAL EXAMPLES
+# =============================================================================
+
+key_value_replace:
+  # =============================================================================
+  # DATA PIPELINE KEY-VALUE REPLACEMENTS - ACTUAL PATHS
+  # =============================================================================
+  
+  # Replace SQL connection GUID in pipeline JSON
+  - find_key: "$.properties.activities[?(@.name=='Copy from SQL')].typeProperties.source.datasetSettings.externalReferences.connection"
+    replace_value:
+      DEV: "dev-sql-connection-12345678-abcd-ef12-3456-789012345678"
+      UAT: "uat-sql-connection-87654321-dcba-4321-8765-432187654321"
+      PROD: "prod-sql-connection-11223344-5566-7788-99aa-bbccddeeff00"
+    item_type: "DataPipeline"
+    item_name: ["CustomerETL", "ProductETL", "SalesETL"]
+
+  # Replace destination lakehouse artifact ID
+  - find_key: "$.properties.activities[?(@.name=='Copy to Lakehouse')].typeProperties.sink.datasetSettings.linkedService.properties.typeProperties.artifactId"
+    replace_value:
+      DEV: "$items.Lakehouse.RetailDataLake.id"
+      UAT: "$items.Lakehouse.RetailDataLake.id"
+      PROD: "$items.Lakehouse.RetailDataLake.id"
+    item_type: "DataPipeline"
+
+  # Replace workspace ID in pipeline sink configuration
+  - find_key: "$.properties.activities[?(@.name=='Copy to Lakehouse')].typeProperties.sink.datasetSettings.linkedService.properties.typeProperties.workspaceId"
+    replace_value:
+      DEV: "$workspace.id"
+      UAT: "$workspace.id"
+      PROD: "$workspace.id"
+    item_type: "DataPipeline"
+
+  # =============================================================================
+  # SEMANTIC MODEL KEY-VALUE REPLACEMENTS - ACTUAL PATHS
+  # =============================================================================
+
+  # Replace data source server in semantic model
+  - find_key: "$.model.dataSources[0].connectionDetails.address.server"
+    replace_value:
+      DEV: "retailwarehouse-dev.datawarehouse.fabric.microsoft.com"
+      UAT: "retailwarehouse-uat.datawarehouse.fabric.microsoft.com"
+      PROD: "retailwarehouse-prod.datawarehouse.fabric.microsoft.com"
+    item_type: "SemanticModel"
+
+  # Replace database name in semantic model
+  - find_key: "$.model.dataSources[0].connectionDetails.address.database"
+    replace_value:
+      DEV: "RetailDW_Dev"
+      UAT: "RetailDW_UAT"
+      PROD: "RetailDW_Prod"
+    item_type: "SemanticModel"
+
+  # =============================================================================
+  # DATAFLOW KEY-VALUE REPLACEMENTS - ACTUAL CONNECTIONS
+  # =============================================================================
+
+  # Replace connection details in dataflow metadata
+  - find_key: "$.connections[0].connectionId"
+    replace_value:
+      DEV: '{"ClusterId":"retail-dev-cluster","DatasourceId":"sql-server-dev-001"}'
+      UAT: '{"ClusterId":"retail-uat-cluster","DatasourceId":"sql-server-uat-001"}'
+      PROD: '{"ClusterId":"retail-prod-cluster","DatasourceId":"sql-server-prod-001"}'
+    item_type: "Dataflow"
+    file_path: "**/queryMetadata.json"
+
+  # Replace Power Query connection server
+  - find_key: "$.queries[0].formula"
+    replace_value:
+      DEV: 'Sql.Database("retail-source-dev.database.windows.net", "RetailTransactions_Dev")'
+      UAT: 'Sql.Database("retail-source-uat.database.windows.net", "RetailTransactions_UAT")'
+      PROD: 'Sql.Database("retail-source-prod.database.windows.net", "RetailTransactions_Prod")'
+    item_type: "Dataflow"
+
+  # =============================================================================
+  # EVENTSTREAM KEY-VALUE REPLACEMENTS - ACTUAL CONFIGURATIONS
+  # =============================================================================
+
+  # Replace Event Hub connection in eventstream
+  - find_key: "$.properties.sources[0].sourceConfig.connectionString"
+    replace_value:
+      DEV: "Endpoint=sb://retail-events-dev.servicebus.windows.net/;SharedAccessKeyName=ListenKey;SharedAccessKey=DEV_LISTEN_KEY"
+      UAT: "Endpoint=sb://retail-events-uat.servicebus.windows.net/;SharedAccessKeyName=ListenKey;SharedAccessKey=UAT_LISTEN_KEY"
+      PROD: "Endpoint=sb://retail-events-prod.servicebus.windows.net/;SharedAccessKeyName=ListenKey;SharedAccessKey=PROD_LISTEN_KEY"
+    item_type: "Eventstream"
+
+  # Replace consumer group name
+  - find_key: "$.properties.sources[0].sourceConfig.consumerGroup"
+    replace_value:
+      DEV: "fabric-dev-consumer"
+      UAT: "fabric-uat-consumer"
+      PROD: "fabric-prod-consumer"
+    item_type: "Eventstream"
+
+  # =============================================================================
+  # KQL QUERYSET KEY-VALUE REPLACEMENTS - ACTUAL DATABASE IDS
+  # =============================================================================
+
+  # Replace KQL database reference
+  - find_key: "$.databaseId"
+    replace_value:
+      DEV: "$items.KQLDatabase.RetailAnalyticsDB.id"
+      UAT: "$items.KQLDatabase.RetailAnalyticsDB.id"
+      PROD: "$items.KQLDatabase.RetailAnalyticsDB.id"
+    item_type: "KQLQueryset"
+
+  # Replace cluster URI in KQL queryset
+  - find_key: "$.clusterUri"
+    replace_value:
+      DEV: "https://retail-kusto-dev.eastus2.kusto.fabric.microsoft.com"
+      UAT: "https://retail-kusto-uat.westus2.kusto.fabric.microsoft.com"
+      PROD: "https://retail-kusto-prod.centralus.kusto.fabric.microsoft.com"
+    item_type: "KQLQueryset"
+
+# =============================================================================
+# SPARK POOL PARAMETERIZATION - ACTUAL POOL CONFIGURATIONS
+# =============================================================================
+
+spark_pool:
+  # Production workload pool configuration
+  - instance_pool_id: "large-pool-12345678-abcd-ef12-3456-789012345678"
+    replace_value:
+      DEV:
+        type: "Workspace"
+        name: "DevPool_Small"  # 2-4 cores, 8-16GB RAM
+      UAT:
+        type: "Workspace"
+        name: "UATPool_Medium"  # 4-8 cores, 16-32GB RAM
+      PROD:
+        type: "Workspace"
+        name: "ProdPool_Large"  # 8-16 cores, 32-64GB RAM
+    item_type: "Environment"
+    item_name: ["ProductionMLEnvironment", "HeavyProcessingEnv"]
+
+  # Standard processing pool configuration
+  - instance_pool_id: "medium-pool-87654321-dcba-4321-8765-432187654321"
+    replace_value:
+      DEV:
+        type: "Workspace"
+        name: "DevPool_Starter"  # 1-2 cores, 4-8GB RAM
+      UAT:
+        type: "Workspace"
+        name: "UATPool_Standard" # 2-4 cores, 8-16GB RAM
+      PROD:
+        type: "Workspace"
+        name: "ProdPool_Standard" # 4-8 cores, 16-32GB RAM
+    item_type: "Environment"
+    item_name: ["StandardDataProcessing", "ReportingEnvironment"]
+
+# =============================================================================
+# REAL-WORLD USAGE NOTES FOR EACH ITEM TYPE
+# =============================================================================
+#
+# This example demonstrates actual values you might encounter when migrating:
+#
+# 1. WORKSPACE IDS: Always use $workspace.id for dynamic replacement
+# 2. ITEM REFERENCES: Use $items.<ItemType>.<ItemName>.id for cross-references
+# 3. CONNECTION STRINGS: Replace server names, database names, and keys
+# 4. API ENDPOINTS: Update URLs for different environments
+# 5. STORAGE ACCOUNTS: Change account names and endpoints per environment
+# 6. SPARK POOLS: Configure appropriate sizing for each environment
+#
+# COMMON REAL-WORLD PATTERNS:
+# - SQL Server: server-env.database.windows.net
+# - Storage Account: accountnameenv.dfs.core.windows.net
+# - Event Hub: namespace-env.servicebus.windows.net
+# - API Endpoints: api-env.company.com or env-api.company.com
+# - Database Names: DatabaseName_ENV
+#
+# BEST PRACTICES DEMONSTRATED:
+# - Use environment-specific naming conventions
+# - Maintain consistent patterns across environments
+# - Use dynamic item references where possible
+# - Include both simple string replacement and complex JSON path replacement
+# - Cover all major connection types and data sources
+# - Show realistic GUIDs and connection strings (sanitized)
+#
+# SECURITY CONSIDERATIONS:
+# - Never commit actual secrets or connection strings to Git
+# - Use Key Vault references in production: @Microsoft.KeyVault(...)
+# - Consider using managed identities where possible
+# - Sanitize all example values before sharing
