@@ -209,7 +209,38 @@ You can have both environments set up simultaneously:
 - Ensure Python 3.8+ is installed
 - Check your corporate firewall/proxy settings
 
-## 📋 WHAT'S INCLUDED
+## �️ ENHANCED ERROR HANDLING & DEPLOYMENT FEATURES
+
+### 🔄 Smart Error Recovery
+The deployment script now includes enhanced error handling that automatically recovers from common deployment issues:
+
+- **Connection Permission Errors**: When bulk deployment fails due to connection access issues, the script automatically switches to individual item deployment
+- **Item-by-Item Processing**: Continues deploying other items even if some fail due to permissions
+- **Detailed Error Reporting**: Provides specific guidance for "User does not have access to the connection" errors
+- **Deployment Summary**: Shows comprehensive success/failure breakdown by item type
+
+### 📊 Example Error Handling Output
+```
+❌ Error during bulk deployment: User does not have access to the connection 'connection_name'
+🔄 Switching to individual item deployment...
+✅ Notebook 'data_analysis.Notebook' deployed successfully
+❌ Lakehouse 'raw_data.Lakehouse' failed: Connection permission required
+✅ Warehouse 'analytics_dw.Warehouse' deployed successfully
+
+📊 DEPLOYMENT SUMMARY:
+   ✅ Notebooks: 3/4 successful
+   ❌ Lakehouses: 0/2 successful (connection permissions required)
+   ✅ Warehouses: 1/1 successful
+```
+
+### 🛠️ Connection Permission Issues
+If you encounter connection permission errors:
+1. **Contact your Fabric administrator** to grant access to required connections
+2. **Check workspace permissions** - ensure you have Contributor or Admin role
+3. **Verify connection exists** in the target workspace
+4. **Review item dependencies** - some items may require specific data connections
+
+## �📋 WHAT'S INCLUDED
 
 ```
 🚀 CORE DEPLOYMENT SCRIPTS
