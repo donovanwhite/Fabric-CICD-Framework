@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 Microsoft Fabric CI/CD Setup Script
 =============================================================
@@ -382,9 +383,19 @@ Examples:
             print(f"📋 Loading parameter file: {args.parameter_file}")
             try:
                 import yaml
-                with open(args.parameter_file, 'r') as f:
+                with open(args.parameter_file, 'r', encoding='utf-8') as f:
                     parameter_config = yaml.safe_load(f)
                 print(f"✅ Parameter file loaded successfully")
+                
+                # Apply parameter file settings to override command line args where applicable
+                if 'workspace_id' in parameter_config and not args.workspace_id:
+                    args.workspace_id = parameter_config['workspace_id']
+                    print(f"   Using workspace_id from parameter file: {args.workspace_id}")
+                    
+                if 'item_types' in parameter_config and not args.item_types:
+                    args.item_types = parameter_config['item_types']
+                    print(f"   Using item_types from parameter file: {args.item_types}")
+                    
             except ImportError:
                 print(f"❌ PyYAML not installed. Install with: pip install PyYAML")
                 sys.exit(1)
@@ -428,15 +439,14 @@ Examples:
             # Set up authentication credential
             if args.client_id:
                 print("🔐 Using Service Principal authentication...")
-                from azure.identity import ClientSecretCredential
-                credential = ClientSecretCredential(
-                    tenant_id=args.tenant_id,
-                    client_id=args.client_id,
-                    client_secret=args.client_secret
-                )
+                # Set environment variables for service principal authentication
+                # This is the most compatible approach with fabric-cicd
+                os.environ['AZURE_CLIENT_ID'] = args.client_id
+                os.environ['AZURE_CLIENT_SECRET'] = args.client_secret
+                os.environ['AZURE_TENANT_ID'] = args.tenant_id
+                print("   Environment variables set for service principal")
             else:
                 print("🔐 Using DefaultAzureCredential...")
-                credential = DefaultAzureCredential()
             
             # Initialize workspace with authentication
             workspace_params = {
@@ -445,10 +455,7 @@ Examples:
                 'item_type_in_scope': item_types
             }
             
-            # Add credential if service principal is used
-            if args.client_id:
-                workspace_params['credential'] = credential
-            
+            # FabricWorkspace will automatically use environment variables for auth
             workspace = FabricWorkspace(**workspace_params)
             
         except Exception as e:
@@ -507,7 +514,7 @@ Examples:
         
     finally:
         # Clean up temporary directory
-        if repo_path and os.path.exists(temp_dir):
+        if args and hasattr(args, 'repo_url') and args.repo_url and os.path.exists(temp_dir):
             try:
                 print(f"🧹 Cleaning up: {temp_dir}")
                 shutil.rmtree(temp_dir)
