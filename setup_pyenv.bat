@@ -7,22 +7,25 @@ REM using pyenv for Python version management instead of conda.
 REM Perfect for users who cannot install conda or prefer pyenv.
 
 echo.
-echo 🚀 MICROSOFT FABRIC CI/CD ENVIRONMENT SETUP (PYENV)
-echo ===================================================
-echo 💡 This script works without admin permissions
-echo    Python packages will be installed at user level if needed
-echo    Virtual environments provide isolated package management
+echo 🚀 MICROSOFT FABRIC CI/CD ENVIRONMENT SETUP (PYENV - USER MODE)
+echo ================================================================
+echo � This script is designed for NON-ADMIN users
+echo    All installations will be performed at user level
+echo    No administrator privileges required
 echo.
 
-REM Test write permissions
-echo 🔍 Checking permissions...
+REM Test write permissions to current directory (user mode)
+echo 🔍 Verifying user-level write permissions...
 echo test > test_write.tmp 2>nul
 if exist test_write.tmp (
     del test_write.tmp
-    echo ✅ Write permissions confirmed
+    echo ✅ User-level write permissions confirmed
 ) else (
-    echo ⚠️  Limited write permissions detected
-    echo    Installation will use user-level directories
+    echo ❌ Cannot write to current directory
+    echo 💡 Please run this script from a directory you have write access to
+    echo    (e.g., Documents, Desktop, or a project folder)
+    pause
+    exit /b 1
 )
 echo.
 
@@ -45,7 +48,8 @@ if exist "%USERPROFILE%\.pyenv\pyenv-win\bin\pyenv.bat" (
 if %errorlevel% neq 0 (
     echo ❌ pyenv-win is not installed or not in PATH
     echo.
-    echo 💡 Installing pyenv-win...
+    echo 💡 Installing pyenv-win (user-level installation)...
+    echo    This will install to %USERPROFILE%\.pyenv (user directory only)
     echo.
     
     REM Check if we have git
@@ -63,11 +67,13 @@ if %errorlevel% neq 0 (
         exit /b 1
     )
     
-    REM Install pyenv-win
-    echo 📦 Cloning pyenv-win repository...
+    REM Install pyenv-win to user directory
+    echo 📦 Installing pyenv-win to user directory...
+    echo    Location: %USERPROFILE%\.pyenv (no admin privileges required)
     git clone https://github.com/pyenv-win/pyenv-win.git %USERPROFILE%\.pyenv
     if %errorlevel% neq 0 (
-        echo ❌ Failed to clone pyenv-win repository
+        echo ❌ Failed to install pyenv-win to user directory
+        echo 💡 Please ensure you have write access to %USERPROFILE%
         pause
         exit /b 1
     )
@@ -78,13 +84,19 @@ if %errorlevel% neq 0 (
     set "PYENV=%USERPROFILE%\.pyenv\pyenv-win"
     set "PATH=%PYENV_HOME%\bin;%PYENV_HOME%\shims;%PATH%"
     
-    echo ✅ pyenv-win installed successfully
+    echo ✅ pyenv-win installed successfully to user directory
     echo.
-    echo ⚠️  IMPORTANT: You need to add pyenv to your PATH permanently.
-    echo    Add these to your system environment variables:
+    echo ⚠️  IMPORTANT: You need to add pyenv to your user PATH environment variable.
+    echo    Add these to your USER environment variables (not system):
     echo    PYENV_ROOT=%USERPROFILE%\.pyenv
     echo    PYENV_HOME=%USERPROFILE%\.pyenv\pyenv-win
     echo    PATH=%PYENV_HOME%\bin;%PYENV_HOME%\shims;[existing PATH]
+    echo.
+    echo 💡 To set user environment variables:
+    echo    1. Press Win+R, type 'sysdm.cpl', press Enter
+    echo    2. Click 'Environment Variables'
+    echo    3. In 'User variables' section (top), edit PATH
+    echo    4. Add the pyenv paths to your user PATH only
     echo.
     echo 🔄 Refreshing environment...
     
@@ -107,14 +119,16 @@ echo 📋 Checking available Python versions...
 pyenv versions
 echo.
 
-REM Install Python 3.12.10 if not available
+REM Install Python 3.12.10 if not available (user-level installation)
 pyenv versions | findstr "3.12.10" >nul
 if %errorlevel% neq 0 (
-    echo 📦 Installing Python 3.12.10...
+    echo 📦 Installing Python 3.12.10 to user directory...
+    echo    This will install to %USERPROFILE%\.pyenv\versions\3.12.10
     pyenv install 3.12.10
     if %errorlevel% neq 0 (
-        echo ❌ Failed to install Python 3.12.10
+        echo ❌ Failed to install Python 3.12.10 to user directory
         echo 💡 Try manually: pyenv install 3.12.10
+        echo    Installation location: User directory only (no admin required)
         pause
         exit /b 1
     )
@@ -146,29 +160,32 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-REM Upgrade pip
+REM Upgrade pip (user-level installation)
 echo.
-echo 📦 Upgrading pip...
+echo 📦 Upgrading pip (user-level installation)...
+echo    Installing to user directory only (no admin required)
 python -m pip install --upgrade pip --user
 if %errorlevel% neq 0 (
-    echo ⚠️  Pip upgrade failed, trying without --user flag...
-    python -m pip install --upgrade pip
-    if %errorlevel% neq 0 (
-        echo ⚠️  Pip upgrade failed, continuing with existing version...
-    )
-)
-
-REM Create virtual environment
-echo.
-echo 🔧 Creating virtual environment 'fabric-cicd-venv'...
-python -m venv fabric-cicd-venv
-if %errorlevel% neq 0 (
-    echo ❌ Failed to create virtual environment
+    echo ❌ Failed to upgrade pip with user-level installation
+    echo 💡 This script is designed for user-mode installations only
+    echo    If you encounter permissions issues, ensure you're in a writable directory
     pause
     exit /b 1
 )
 
-echo ✅ Virtual environment created successfully
+REM Create virtual environment in user directory
+echo.
+echo 🔧 Creating virtual environment 'fabric-cicd-venv' (user directory)...
+echo    Location: %CD%\fabric-cicd-venv (no admin privileges required)
+python -m venv fabric-cicd-venv
+if %errorlevel% neq 0 (
+    echo ❌ Failed to create virtual environment in user directory
+    echo 💡 Ensure you have write permissions to: %CD%
+    pause
+    exit /b 1
+)
+
+echo ✅ Virtual environment created successfully in user directory
 
 REM Activate virtual environment
 echo.
@@ -182,17 +199,22 @@ if %errorlevel% neq 0 (
 
 echo ✅ Virtual environment activated
 
-REM Upgrade pip in virtual environment
+REM Upgrade pip in virtual environment (user-level)
 echo.
-echo 📦 Upgrading pip in virtual environment...
+echo 📦 Upgrading pip in virtual environment (user directory)...
+echo    Installing to virtual environment only (no admin required)
 python -m pip install --upgrade pip
 if %errorlevel% neq 0 (
-    echo ⚠️  Pip upgrade in virtual environment failed, continuing with existing version...
+    echo ❌ Pip upgrade in virtual environment failed
+    echo 💡 Virtual environment should have user permissions by default
+    pause
+    exit /b 1
 )
 
-REM Install core dependencies
+REM Install core dependencies (user-level virtual environment)
 echo.
-echo 📦 Installing core dependencies...
+echo 📦 Installing core dependencies to virtual environment...
+echo    Installing to user virtual environment (no admin privileges required):
 echo    - fabric-cicd (latest version)
 echo    - azure-identity
 echo    - PyYAML
@@ -205,8 +227,8 @@ if %errorlevel% neq 0 (
     echo ⚠️  Failed to install fabric-cicd with force-reinstall, trying standard install...
     pip install fabric-cicd --upgrade
     if %errorlevel% neq 0 (
-        echo ❌ Failed to install fabric-cicd
-        echo 💡 Try running as administrator or check your internet connection
+        echo ❌ Failed to install fabric-cicd to virtual environment
+        echo 💡 Check your internet connection or try running from a different directory
         pause
         exit /b 1
     )
@@ -228,19 +250,21 @@ if %errorlevel% neq 0 (
 
 echo ✅ All dependencies installed successfully
 
-REM Verify installation
+REM Verify installation (user environment)
 echo.
-echo 🔍 Verifying installation...
-python -c "import fabric_cicd; print('✅ fabric-cicd imported successfully')"
+echo 🔍 Verifying installation in user virtual environment...
+python -c "import fabric_cicd; print('✅ fabric-cicd imported successfully from virtual environment')"
 if %errorlevel% neq 0 (
-    echo ❌ fabric-cicd import failed
+    echo ❌ fabric-cicd import failed in virtual environment
+    echo 💡 Installation should work in virtual environment without admin rights
     pause
     exit /b 1
 )
 
-python -c "import azure.identity; print('✅ azure-identity imported successfully')"
+python -c "import azure.identity; print('✅ azure-identity imported successfully from virtual environment')"
 if %errorlevel% neq 0 (
-    echo ❌ azure-identity import failed
+    echo ❌ azure-identity import failed in virtual environment
+    echo 💡 Installation should work in virtual environment without admin rights
     pause
     exit /b 1
 )
@@ -254,33 +278,37 @@ if exist "check_compatibility.py" (
     echo ⚠️  check_compatibility.py not found, skipping compatibility check
 )
 
-REM Create activation script for pyenv environment
+REM Create activation script for pyenv environment (user-mode)
 echo.
-echo 📝 Creating activation script...
+echo 📝 Creating user-mode activation script...
+echo    Creating: activate_fabric_env_pyenv.bat (user environment only)
 (
 echo @echo off
-echo REM Quick activation script for Fabric CICD environment ^(PyEnv^)
-echo echo 🔄 Activating Fabric CICD environment ^(PyEnv^)...
+echo REM Quick activation script for Fabric CICD environment ^(PyEnv - User Mode^)
+echo echo 🔄 Activating Fabric CICD environment ^(PyEnv - User Mode^)...
+echo echo    User-level installation - no admin privileges required
 echo.
-echo REM Set pyenv environment
+echo REM Set pyenv environment ^(user directory^)
 echo set "PYENV_ROOT=%%USERPROFILE%%\.pyenv"
 echo set "PYENV_HOME=%%USERPROFILE%%\.pyenv\pyenv-win"
 echo set "PATH=%%PYENV_HOME%%\bin;%%PYENV_HOME%%\shims;%%PATH%%"
+echo echo 📂 PyEnv location: %%PYENV_ROOT%% ^(user directory^)
 echo.
-echo REM Activate virtual environment
+echo REM Activate virtual environment ^(user directory^)
 echo call fabric-cicd-venv\Scripts\activate.bat
 echo if %%errorlevel%% neq 0 ^(
 echo     echo ❌ Failed to activate virtual environment 'fabric-cicd-venv'
-echo     echo 💡 Run setup_pyenv.bat first to create the environment
+echo     echo 💡 Run setup_pyenv.bat first to create the user environment
 echo     pause
 echo     exit /b 1
 echo ^)
 echo.
-echo echo ✅ Environment activated: fabric-cicd-venv ^(PyEnv^)
+echo echo ✅ Environment activated: fabric-cicd-venv ^(PyEnv - User Mode^)
+echo echo 📂 Virtual environment: %%CD%%\fabric-cicd-venv ^(user directory^)
 echo echo.
 echo.
 echo REM Run compatibility check
-echo echo 🔍 Running compatibility check...
+echo echo 🔍 Running compatibility check in user environment...
 echo if exist "check_compatibility.py" ^(
 echo     python check_compatibility.py
 echo ^) else ^(
@@ -289,6 +317,7 @@ echo ^)
 echo echo.
 echo.
 echo echo 💡 You can now run: python fabric_deploy.py --help
+echo echo 📝 All installations are in user directories - no admin access required
 echo echo.
 echo.
 echo REM Stay in the activated environment
@@ -327,40 +356,46 @@ echo }
 
 echo ✅ VS Code configured for PyEnv environment
 
-REM Success message
+REM Success message (user-mode specific)
 echo.
-echo 🎉 SETUP COMPLETE!
-echo ==================
+echo 🎉 USER-MODE SETUP COMPLETE!
+echo ==============================
 echo.
-echo ✅ Python 3.12.10 installed via pyenv
-echo ✅ Virtual environment 'fabric-cicd-venv' created
-echo ✅ fabric-cicd and dependencies installed
-echo ✅ VS Code configured
+echo ✅ Python 3.12.10 installed via pyenv (user directory)
+echo ✅ Virtual environment 'fabric-cicd-venv' created (user directory)
+echo ✅ fabric-cicd and dependencies installed (user virtual environment)
+echo ✅ VS Code configured for user environment
 echo ✅ Activation script created: activate_fabric_env_pyenv.bat
 echo.
-echo 📋 NEXT STEPS:
+echo � INSTALLATION LOCATIONS (All in user directories):
+echo    PyEnv: %USERPROFILE%\.pyenv
+echo    Virtual Environment: %CD%\fabric-cicd-venv
+echo    Python Packages: Within virtual environment only
+echo.
+echo �📋 NEXT STEPS:
 echo 1. Close and reopen your command prompt to ensure PATH changes take effect
 echo 2. Run: activate_fabric_env_pyenv.bat
 echo 3. Test with: python fabric_deploy.py --help
 echo.
-echo 💡 IMPORTANT NOTES:
+echo 💡 USER-MODE INSTALLATION NOTES:
+echo - This installation requires NO administrator privileges
+echo - All files are installed in user directories only
 echo - Use 'activate_fabric_env_pyenv.bat' to activate this environment
-echo - This uses pyenv + virtual environment instead of conda
-echo - Your Python version is managed by pyenv locally in this project
-echo - Virtual environment is in the 'fabric-cicd-venv' folder
-echo - Installation works without admin permissions
-echo - Packages are installed in isolated virtual environment
+echo - PyEnv manages Python versions in user space
+echo - Virtual environment isolates packages from system Python
+echo - Perfect for corporate/restricted environments
 echo.
 echo 🔧 If you encounter issues:
 echo 1. Restart your command prompt
-echo 2. Ensure pyenv is in your PATH
+echo 2. Ensure pyenv is in your USER PATH (not system PATH)
 echo 3. Run: pyenv versions (should show 3.12.10)
 echo 4. Run: pyenv local 3.12.10
 echo.
-echo 🔒 For permission-related issues:
-echo 1. Ensure you can write to the current directory
-echo 2. Virtual environments don't require admin permissions
-echo 3. If pyenv installation fails, try manual download from GitHub
+echo 🔒 USER-MODE TROUBLESHOOTING:
+echo 1. All installations are in user directories - no admin needed
+echo 2. Virtual environments always use user permissions
+echo 3. If pyenv installation fails, check git is available
+echo 4. Ensure you have write access to %USERPROFILE% and current directory
 echo 4. Contact your IT department if corporate policies block installations
 echo.
 

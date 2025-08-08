@@ -140,20 +140,23 @@ This project supports two Python environment management approaches to accommodat
 - 🚫 May not be allowed in some corporate environments
 - 💾 Uses more disk space
 
-#### 🎯 Option 2: PyEnv + Virtual Environment
+#### 🎯 Option 2: PyEnv + Virtual Environment (User-Mode Only)
 
 **Use when:**
 - ✅ You cannot install Anaconda/Miniconda
 - ✅ You're in a restricted corporate environment
+- ✅ You DON'T have administrator privileges
+- ✅ You need user-level installations only
 - ✅ You prefer lightweight Python version management
-- ✅ You want more control over Python versions
 
 **Pros:**
 - 🪶 Lightweight Python version management
 - 🔓 Works in restricted environments
+- 👤 NO administrator privileges required
 - 🎛️ Fine-grained Python version control
 - 📦 Standard Python tooling (pip, venv)
-- 🏢 Corporate-friendly
+- 🏢 Perfect for corporate environments
+- 📁 All installations in user directories
 
 **Cons:**
 - ⏱️ Longer initial setup time
@@ -163,26 +166,27 @@ This project supports two Python environment management approaches to accommodat
 
 #### 📊 Quick Comparison
 
-| Feature | Conda | PyEnv + venv |
-|---------|-------|--------------|
+| Feature | Conda | PyEnv + venv (User-Mode) |
+|---------|-------|--------------------------|
 | Installation Size | Large (~400MB+) | Small (~50MB) |
 | Setup Complexity | Simple | Moderate |
-| Corporate Friendly | Sometimes | Usually |
+| Corporate Friendly | Sometimes | Always |
+| Admin Required | Sometimes | Never |
 | Package Management | Excellent | Good |
 | Python Version Control | Good | Excellent |
 | Dependency Resolution | Excellent | Good |
 
 #### 🚀 Setup Recommendations
 
-1. **First choice**: Try `setup.bat` (conda approach)
-2. **If conda fails or not allowed**: Use `setup_pyenv.bat` (pyenv approach)
+1. **If you have admin privileges**: Try `setup.bat` (conda approach)
+2. **If you DON'T have admin privileges**: Use `setup_pyenv.bat` (user-mode pyenv approach)
 3. **If both fail**: Manual pip installation
 
 #### 🔄 Using Both Approaches
 
 You can have both environments set up simultaneously:
-- Conda environment: `activate_fabric_env.bat`
-- PyEnv environment: `activate_fabric_env_pyenv.bat`
+- Conda environment: `activate_fabric_env.bat` (may require admin)
+- PyEnv environment: `activate_fabric_env_pyenv.bat` (user-mode only)
 
 #### 🆘 Troubleshooting
 
@@ -190,10 +194,13 @@ You can have both environments set up simultaneously:
 - Ensure Anaconda/Miniconda is properly installed
 - Check PATH environment variables
 - Run `conda info` to verify installation
+- May require administrator privileges
 
-**PyEnv Issues:**
-- Ensure Git is installed and accessible
-- Check if pyenv-win is in PATH
+**PyEnv User-Mode Issues:**
+- Ensure Git is installed and accessible (no admin required)
+- Check if pyenv-win is in USER PATH (not system PATH)
+- All installations go to user directories (%USERPROFILE%\.pyenv)
+- Virtual environment created in current directory
 - Restart command prompt after pyenv installation
 - Run `pyenv versions` to verify installation
 
