@@ -45,9 +45,10 @@ if exist "%USERPROFILE%\.pyenv\pyenv-win\bin\pyenv.bat" (
     set "PATH=%PYENV_HOME%\bin;%PYENV_HOME%\shims;%PATH%"
     goto :PYENV_FOUND
 )
-if %errorlevel% neq 0 (
-    echo ❌ pyenv-win is not installed or not in PATH
-    echo.
+
+REM If we reach here, pyenv-win is not installed
+echo ❌ pyenv-win is not installed or not in PATH
+echo.
     echo 💡 Installing pyenv-win (user-level installation)...
     echo    This will install to %USERPROFILE%\.pyenv (user directory only)
     echo.
@@ -99,12 +100,6 @@ if %errorlevel% neq 0 (
     echo    4. Add the pyenv paths to your user PATH only
     echo.
     echo 🔄 Refreshing environment...
-    
-) else (
-    echo ✅ pyenv-win found
-    set "PYENV_ROOT=%USERPROFILE%\.pyenv"
-    set "PYENV_HOME=%USERPROFILE%\.pyenv\pyenv-win"
-)
 
 :PYENV_FOUND
 
@@ -116,18 +111,18 @@ echo.
 
 REM Check if Python 3.12 is available via pyenv
 echo 📋 Checking available Python versions...
-pyenv versions
+"%PYENV_HOME%\bin\pyenv.bat" versions
 echo.
 
 REM Install Python 3.12.10 if not available (user-level installation)
-pyenv versions | findstr "3.12.10" >nul
+"%PYENV_HOME%\bin\pyenv.bat" versions | findstr "3.12.10" >nul
 if %errorlevel% neq 0 (
     echo 📦 Installing Python 3.12.10 to user directory...
     echo    This will install to %USERPROFILE%\.pyenv\versions\3.12.10
-    pyenv install 3.12.10
+    "%PYENV_HOME%\bin\pyenv.bat" install 3.12.10
     if %errorlevel% neq 0 (
         echo ❌ Failed to install Python 3.12.10 to user directory
-        echo 💡 Try manually: pyenv install 3.12.10
+        echo 💡 Try manually: "%PYENV_HOME%\bin\pyenv.bat" install 3.12.10
         echo    Installation location: User directory only (no admin required)
         pause
         exit /b 1
@@ -140,7 +135,7 @@ if %errorlevel% neq 0 (
 REM Set local Python version for this project
 echo.
 echo 🔧 Setting up project Python environment...
-pyenv local 3.12.10
+"%PYENV_HOME%\bin\pyenv.bat" local 3.12.10
 if %errorlevel% neq 0 (
     echo ❌ Failed to set local Python version
     pause
@@ -399,4 +394,4 @@ echo 4. Ensure you have write access to %USERPROFILE% and current directory
 echo 4. Contact your IT department if corporate policies block installations
 echo.
 
-pause
+echo ✅ Setup script completed!
