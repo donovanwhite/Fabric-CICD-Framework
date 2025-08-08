@@ -9,6 +9,8 @@ REM Perfect for users who cannot install conda or prefer pyenv.
 echo.
 echo 🚀 MICROSOFT FABRIC CI/CD ENVIRONMENT SETUP (PYENV)
 echo ===================================================
+echo 💡 This script works without admin permissions
+echo    Python packages will be installed at user level if needed
 echo.
 
 REM Check if pyenv-win is installed
@@ -134,9 +136,13 @@ if %errorlevel% neq 0 (
 REM Upgrade pip
 echo.
 echo 📦 Upgrading pip...
-python -m pip install --upgrade pip
+python -m pip install --upgrade pip --user
 if %errorlevel% neq 0 (
-    echo ⚠️  Pip upgrade failed, continuing anyway...
+    echo ⚠️  Pip upgrade failed, trying without --user flag...
+    python -m pip install --upgrade pip
+    if %errorlevel% neq 0 (
+        echo ⚠️  Pip upgrade failed, continuing with existing version...
+    )
 )
 
 REM Create virtual environment
@@ -167,6 +173,9 @@ REM Upgrade pip in virtual environment
 echo.
 echo 📦 Upgrading pip in virtual environment...
 python -m pip install --upgrade pip
+if %errorlevel% neq 0 (
+    echo ⚠️  Pip upgrade in virtual environment failed, continuing with existing version...
+)
 
 REM Install core dependencies
 echo.
@@ -298,7 +307,7 @@ echo.
 echo 🎉 SETUP COMPLETE!
 echo ==================
 echo.
-echo ✅ Python 3.12.11 installed via pyenv
+echo ✅ Python 3.12.10 installed via pyenv
 echo ✅ Virtual environment 'fabric-cicd-venv' created
 echo ✅ fabric-cicd and dependencies installed
 echo ✅ VS Code configured
@@ -314,12 +323,13 @@ echo - Use 'activate_fabric_env_pyenv.bat' to activate this environment
 echo - This uses pyenv + virtual environment instead of conda
 echo - Your Python version is managed by pyenv locally in this project
 echo - Virtual environment is in the 'fabric-cicd-venv' folder
+echo - Installation works without admin permissions (uses user-level installs)
 echo.
 echo 🔧 If you encounter issues:
 echo 1. Restart your command prompt
 echo 2. Ensure pyenv is in your PATH
-echo 3. Run: pyenv versions (should show 3.12.11)
-echo 4. Run: pyenv local 3.12.11
+echo 3. Run: pyenv versions (should show 3.12.10)
+echo 4. Run: pyenv local 3.12.10
 echo.
 
 pause
