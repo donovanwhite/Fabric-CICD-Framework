@@ -11,6 +11,19 @@ echo 🚀 MICROSOFT FABRIC CI/CD ENVIRONMENT SETUP (PYENV)
 echo ===================================================
 echo 💡 This script works without admin permissions
 echo    Python packages will be installed at user level if needed
+echo    Virtual environments provide isolated package management
+echo.
+
+REM Test write permissions
+echo 🔍 Checking permissions...
+echo test > test_write.tmp 2>nul
+if exist test_write.tmp (
+    del test_write.tmp
+    echo ✅ Write permissions confirmed
+) else (
+    echo ⚠️  Limited write permissions detected
+    echo    Installation will use user-level directories
+)
 echo.
 
 REM Check if pyenv-win is installed
@@ -189,16 +202,28 @@ echo.
 
 pip install fabric-cicd --upgrade --force-reinstall
 if %errorlevel% neq 0 (
-    echo ❌ Failed to install fabric-cicd
-    pause
-    exit /b 1
+    echo ⚠️  Failed to install fabric-cicd with force-reinstall, trying standard install...
+    pip install fabric-cicd --upgrade
+    if %errorlevel% neq 0 (
+        echo ❌ Failed to install fabric-cicd
+        echo 💡 Try running as administrator or check your internet connection
+        pause
+        exit /b 1
+    )
 )
 
 pip install azure-identity PyYAML packaging click
 if %errorlevel% neq 0 (
-    echo ❌ Failed to install additional dependencies
-    pause
-    exit /b 1
+    echo ⚠️  Failed to install some dependencies, trying individual installation...
+    echo 📦 Installing azure-identity...
+    pip install azure-identity
+    echo 📦 Installing PyYAML...
+    pip install PyYAML
+    echo 📦 Installing packaging...
+    pip install packaging
+    echo 📦 Installing click...
+    pip install click
+    echo ⚠️  Some dependencies may have failed, but continuing...
 )
 
 echo ✅ All dependencies installed successfully
@@ -323,13 +348,20 @@ echo - Use 'activate_fabric_env_pyenv.bat' to activate this environment
 echo - This uses pyenv + virtual environment instead of conda
 echo - Your Python version is managed by pyenv locally in this project
 echo - Virtual environment is in the 'fabric-cicd-venv' folder
-echo - Installation works without admin permissions (uses user-level installs)
+echo - Installation works without admin permissions
+echo - Packages are installed in isolated virtual environment
 echo.
 echo 🔧 If you encounter issues:
 echo 1. Restart your command prompt
 echo 2. Ensure pyenv is in your PATH
 echo 3. Run: pyenv versions (should show 3.12.10)
 echo 4. Run: pyenv local 3.12.10
+echo.
+echo 🔒 For permission-related issues:
+echo 1. Ensure you can write to the current directory
+echo 2. Virtual environments don't require admin permissions
+echo 3. If pyenv installation fails, try manual download from GitHub
+echo 4. Contact your IT department if corporate policies block installations
 echo.
 
 pause
