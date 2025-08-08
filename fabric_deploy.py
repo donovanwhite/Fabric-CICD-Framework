@@ -62,6 +62,7 @@ except ImportError as e:
     print(f"❌ Missing required dependency: {e}")
     print("📦 Please install required packages:")
     print("   pip install fabric-cicd GitPython azure-identity")
+    print("   Optional: pip install PyYAML (for parameter file support)")
     sys.exit(1)
 
 def check_version_compatibility():
@@ -249,29 +250,63 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  # Basic deployment
+  # Basic deployment with default authentication
   python fabric_deploy.py --workspace-id "your-workspace-id" --repo-url "https://dev.azure.com/org/proj/_git/repo"
   
   # With specific branch
   python fabric_deploy.py --workspace-id "your-workspace-id" --repo-url "repo-url" --branch development
   
+  # Using service principal authentication
+  python fabric_deploy.py --workspace-id "your-workspace-id" --repo-url "repo-url" --client-id "sp-client-id" --client-secret "sp-secret" --tenant-id "tenant-id"
+  
+  # Using parameter file for configuration
+  python fabric_deploy.py --workspace-id "your-workspace-id" --repo-url "repo-url" --parameter-file "parameter.yml"
+  
   # Dry run (analyze only)
   python fabric_deploy.py --workspace-id "your-workspace-id" --repo-url "repo-url" --dry-run
+  
+  # Deploy specific item types only
+  python fabric_deploy.py --workspace-id "your-workspace-id" --repo-url "repo-url" --item-types Notebook Lakehouse
+  
+  # Local directory deployment (skip git clone)
+  python fabric_deploy.py --workspace-id "your-workspace-id" --local-path "./my-fabric-items"
         """
     )
     
     parser.add_argument('--workspace-id', required=True, 
                        help='Microsoft Fabric workspace ID (GUID)')
-    parser.add_argument('--repo-url', required=True,
+    parser.add_argument('--repo-url', 
                        help='Git repository URL (Azure DevOps, GitHub, etc.)')
+    parser.add_argument('--local-path',
+                       help='Local directory path containing Fabric items (alternative to --repo-url)')
     parser.add_argument('--branch', default='main',
                        help='Git branch to deploy from (default: main)')
+    parser.add_argument('--parameter-file',
+                       help='Path to parameter.yml file for configuration')
+    parser.add_argument('--client-id',
+                       help='Service Principal client ID for authentication')
+    parser.add_argument('--client-secret',
+                       help='Service Principal client secret for authentication')
+    parser.add_argument('--tenant-id',
+                       help='Azure tenant ID for service principal authentication')
     parser.add_argument('--dry-run', action='store_true',
                        help='Analyze repository without deploying')
     parser.add_argument('--item-types', nargs='*',
                        help='Specific item types to deploy (auto-detected if not specified)')
     
     args = parser.parse_args()
+    
+    # Validate mutually exclusive options
+    if not args.repo_url and not args.local_path:
+        parser.error("Either --repo-url or --local-path must be specified")
+    
+    if args.repo_url and args.local_path:
+        parser.error("Cannot specify both --repo-url and --local-path")
+    
+    # Service principal authentication requires all three parameters
+    sp_params = [args.client_id, args.client_secret, args.tenant_id]
+    if any(sp_params) and not all(sp_params):
+        parser.error("Service principal authentication requires --client-id, --client-secret, and --tenant-id")
     
     # Check version compatibility first
     check_version_compatibility()
@@ -283,39 +318,80 @@ Examples:
     try:
         print("🚀 FABRIC CI/CD DEPLOYMENT (PROVEN WORKING SOLUTION)")
         print("=" * 60)
-        print(f"📂 Temporary directory: {temp_dir}")
-        print(f"🔗 Repository: {args.repo_url}")
-        print(f"🌿 Branch: {args.branch}")
+        
+        # Handle local path vs repository deployment
+        if args.local_path:
+            print(f"📂 Local path: {args.local_path}")
+            repo_path = args.local_path
+            if not os.path.exists(repo_path):
+                print(f"❌ Local path does not exist: {repo_path}")
+                sys.exit(1)
+        else:
+            print(f"📂 Temporary directory: {temp_dir}")
+            print(f"🔗 Repository: {args.repo_url}")
+            print(f"🌿 Branch: {args.branch}")
+            
         print(f"🎯 Workspace ID: {args.workspace_id}")
+        
+        # Show authentication method
+        if args.client_id:
+            print(f"🔐 Authentication: Service Principal ({args.client_id})")
+        else:
+            print(f"🔐 Authentication: DefaultAzureCredential")
+            
+        if args.parameter_file:
+            print(f"📋 Parameter file: {args.parameter_file}")
+            
         print(f"🧪 Dry run: {args.dry_run}")
         print()
         
-        # Clone repository
-        print("📥 Cloning repository...")
-        try:
-            repo = Repo.clone_from(args.repo_url, temp_dir)
-        except Exception as e:
-            print(f"❌ Failed to clone repository: {e}")
-            print("💡 Check:")
-            print("   - Repository URL is correct")
-            print("   - You have access to the repository")
-            print("   - Azure CLI authentication (az login)")
-            sys.exit(1)
-        
-        # Checkout specific branch
-        if args.branch != 'main':
-            print(f"🔀 Switching to branch: {args.branch}")
+        # Clone repository if using repo-url
+        if args.repo_url:
+            print("📥 Cloning repository...")
             try:
-                repo.git.checkout(args.branch)
+                repo = Repo.clone_from(args.repo_url, temp_dir)
             except Exception as e:
-                print(f"❌ Failed to checkout branch {args.branch}: {e}")
-                print("💡 Available branches:")
-                for branch in repo.heads:
-                    print(f"   - {branch.name}")
+                print(f"❌ Failed to clone repository: {e}")
+                print("💡 Check:")
+                print("   - Repository URL is correct")
+                print("   - You have access to the repository")
+                print("   - Azure CLI authentication (az login)")
                 sys.exit(1)
+            
+            # Checkout specific branch
+            if args.branch != 'main':
+                print(f"🔀 Switching to branch: {args.branch}")
+                try:
+                    repo.git.checkout(args.branch)
+                except Exception as e:
+                    print(f"❌ Failed to checkout branch {args.branch}: {e}")
+                    print("💡 Available branches:")
+                    for branch in repo.heads:
+                        print(f"   - {branch.name}")
+                    sys.exit(1)
+            
+            repo_path = temp_dir
+            print(f"✅ Repository ready at: {repo_path}")
+        else:
+            print(f"✅ Using local path: {repo_path}")
+        print()
         
-        repo_path = temp_dir
-        print(f"✅ Repository ready at: {repo_path}")
+        # Load parameter file if specified
+        parameter_config = {}
+        if args.parameter_file:
+            print(f"📋 Loading parameter file: {args.parameter_file}")
+            try:
+                import yaml
+                with open(args.parameter_file, 'r') as f:
+                    parameter_config = yaml.safe_load(f)
+                print(f"✅ Parameter file loaded successfully")
+            except ImportError:
+                print(f"❌ PyYAML not installed. Install with: pip install PyYAML")
+                sys.exit(1)
+            except Exception as e:
+                print(f"❌ Failed to load parameter file: {e}")
+                print("💡 Check file path and YAML syntax")
+                sys.exit(1)
         print()
         
         # Analyze repository structure
@@ -349,11 +425,32 @@ Examples:
         print("   Using SIMPLE approach that actually works!")
         
         try:
-            workspace = FabricWorkspace(
-                workspace_id=args.workspace_id,
-                repository_directory=repo_path,
-                item_type_in_scope=item_types
-            )
+            # Set up authentication credential
+            if args.client_id:
+                print("🔐 Using Service Principal authentication...")
+                from azure.identity import ClientSecretCredential
+                credential = ClientSecretCredential(
+                    tenant_id=args.tenant_id,
+                    client_id=args.client_id,
+                    client_secret=args.client_secret
+                )
+            else:
+                print("🔐 Using DefaultAzureCredential...")
+                credential = DefaultAzureCredential()
+            
+            # Initialize workspace with authentication
+            workspace_params = {
+                'workspace_id': args.workspace_id,
+                'repository_directory': repo_path,
+                'item_type_in_scope': item_types
+            }
+            
+            # Add credential if service principal is used
+            if args.client_id:
+                workspace_params['credential'] = credential
+            
+            workspace = FabricWorkspace(**workspace_params)
+            
         except Exception as e:
             print(f"❌ Failed to initialize FabricWorkspace: {e}")
             print("💡 Check:")
