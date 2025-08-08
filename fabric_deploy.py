@@ -142,6 +142,107 @@ def analyze_repository(repo_path):
     
     return list(found_types), total_items
 
+def deploy_with_error_handling(workspace):
+    """Deploy Fabric items with enhanced error handling for individual item failures."""
+    print("🚀 Starting deployment with enhanced error handling...")
+    
+    deployment_summary = {
+        'successful': [],
+        'failed': [],
+        'skipped': [],
+        'total': 0
+    }
+    
+    try:
+        # Try the standard publish_all_items first
+        print("📦 Attempting bulk deployment using publish_all_items()...")
+        result = publish_all_items(workspace)
+        print("✅ Bulk deployment completed successfully!")
+        return result
+        
+    except Exception as bulk_error:
+        print(f"⚠️  Bulk deployment failed: {bulk_error}")
+        print("🔄 Switching to individual item deployment with error handling...")
+        print()
+        
+        # Get available item types from the workspace
+        try:
+            # Try to get items individually by type
+            item_types_to_try = [
+                'datapipelines', 'notebooks', 'reports', 'datasets', 
+                'dataflows', 'lakehouses', 'warehouses', 'semanticmodels',
+                'dashboards', 'datamart', 'kqlqueries', 'mlmodels',
+                'mlexperiments', 'sparkjobdefinitions'
+            ]
+            
+            for item_type in item_types_to_try:
+                try:
+                    print(f"📋 Processing {item_type}...")
+                    
+                    # Try to publish this item type
+                    if hasattr(workspace, f'publish_{item_type}'):
+                        publish_method = getattr(workspace, f'publish_{item_type}')
+                        publish_method()
+                        print(f"   ✅ {item_type} deployed successfully")
+                        deployment_summary['successful'].append(item_type)
+                    else:
+                        print(f"   ⚠️  No publish method for {item_type}, skipping")
+                        deployment_summary['skipped'].append(item_type)
+                        
+                except Exception as item_error:
+                    error_msg = str(item_error)
+                    print(f"   ❌ Failed to deploy {item_type}: {error_msg}")
+                    
+                    # Check for specific error types and provide helpful messages
+                    if "does not have access to the connection" in error_msg:
+                        print(f"   💡 Connection permission issue - user needs access to connections used in {item_type}")
+                    elif "User does not have access" in error_msg:
+                        print(f"   💡 Access permission issue - check user permissions for {item_type}")
+                    elif "already exists" in error_msg:
+                        print(f"   💡 Item already exists - consider using update instead of create")
+                    elif "Invalid" in error_msg:
+                        print(f"   💡 Configuration issue - check {item_type} settings and dependencies")
+                    else:
+                        print(f"   💡 Unknown error - review {item_type} configuration")
+                    
+                    deployment_summary['failed'].append({
+                        'item_type': item_type,
+                        'error': error_msg
+                    })
+                    print(f"   🔄 Continuing with next item type...")
+                    
+                deployment_summary['total'] += 1
+                print()
+            
+            # Print deployment summary
+            print("📊 DEPLOYMENT SUMMARY")
+            print("=" * 50)
+            print(f"✅ Successful: {len(deployment_summary['successful'])} item types")
+            for item in deployment_summary['successful']:
+                print(f"   - {item}")
+            
+            print(f"❌ Failed: {len(deployment_summary['failed'])} item types")
+            for item in deployment_summary['failed']:
+                print(f"   - {item['item_type']}: {item['error'][:100]}...")
+            
+            print(f"⚠️  Skipped: {len(deployment_summary['skipped'])} item types")
+            for item in deployment_summary['skipped']:
+                print(f"   - {item}")
+            
+            print(f"📈 Total processed: {deployment_summary['total']} item types")
+            print()
+            
+            if deployment_summary['successful']:
+                print("🎉 Partial deployment completed! Check successful items in your workspace.")
+                return "Partial deployment completed with some failures"
+            else:
+                print("💥 No items were deployed successfully.")
+                raise Exception("All item deployments failed")
+                
+        except Exception as individual_error:
+            print(f"❌ Individual deployment also failed: {individual_error}")
+            raise
+
 def main():
     parser = argparse.ArgumentParser(
         description='Deploy Fabric items using PROVEN working fabric-cicd approach',
@@ -267,20 +368,21 @@ Examples:
         print(f"   📦 Item types in scope: {item_types}")
         print()
         
-        # Execute deployment using PROVEN WORKING approach
-        print("🚀 Deploying using publish_all_items()...")
-        print("   This is the SIMPLE approach that actually works!")
-        print(f"   Deploying {total_items} items...")
+        # Execute deployment using enhanced error handling
+        print("🚀 Deploying with enhanced error handling...")
+        print("   This approach handles connection permission issues gracefully!")
+        print(f"   Processing {total_items} items...")
         print()
         
         try:
-            result = publish_all_items(workspace)
+            result = deploy_with_error_handling(workspace)
             
-            print("✅ DEPLOYMENT COMPLETED SUCCESSFULLY!")
+            print("✅ DEPLOYMENT COMPLETED!")
             print(f"📊 Result: {result}")
             print()
             print("🎉 Your Fabric items should now be visible in the workspace!")
             print("💡 Check your Fabric workspace to verify the deployment.")
+            print("💡 Items with connection issues may need manual permission fixes.")
             
         except Exception as e:
             print(f"❌ Deployment failed: {e}")
@@ -292,6 +394,8 @@ Examples:
             print("   - Workspace permissions (need Admin or Member role)")
             print("   - Authentication expired (try az login)")
             print("   - Network connectivity issues")
+            print("   - Connection access issues (check item-specific permissions)")
+            print("   - User needs access to connections used in data pipelines")
             sys.exit(1)
         
     except KeyboardInterrupt:
