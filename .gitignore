@@ -22,7 +22,9 @@ debug_*.bat
 
 # IMPORTANT: Do NOT ignore these setup files
 !setup.bat
+!setup_pyenv.bat
 !activate_fabric_env.bat
+!activate_fabric_env_pyenv.bat
 
 # VS Code and IDE files
 .vscode/
@@ -38,6 +40,8 @@ __pycache__/
 env/
 venv/
 ENV/
+fabric-cicd-venv/
+.pyenv/
 .env
 
 # Logs and reports

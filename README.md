@@ -47,9 +47,11 @@ This framework provides a **simple, tested approach** for deploying Microsoft Fa
 
 ## 🛠️ QUICK START
 
-### 1. Environment Setup (Recommended)
+### 1. Environment Setup (Choose Your Python Manager)
+
+#### Option A: Conda Environment (Recommended)
 ```batch
-REM Windows: Run the automated setup script
+REM Windows: Run the automated conda setup script
 setup.bat
 ```
 This script will:
@@ -58,6 +60,19 @@ This script will:
 - ✅ Configure VS Code settings for the environment
 - ✅ Verify Python and fabric-cicd version compatibility
 - ✅ Test fabric-cicd installation
+
+#### Option B: PyEnv + Virtual Environment (For users who cannot install conda)
+```batch
+REM Windows: Run the automated pyenv setup script
+setup_pyenv.bat
+```
+This script will:
+- ✅ Install pyenv-win if not available
+- ✅ Install Python 3.12.11 via pyenv
+- ✅ Create a virtual environment 'fabric-cicd-venv'
+- ✅ Install all dependencies from requirements.txt
+- ✅ Configure VS Code settings for the environment
+- ✅ Verify Python and fabric-cicd version compatibility
 
 ### 2. Manual Installation (Alternative)
 ```bash
@@ -70,9 +85,17 @@ az login
 ```
 
 ### 4. Quick Environment Activation
+
+#### For Conda Environment:
 ```batch
-REM After setup, use this to quickly activate the environment
+REM Activate conda environment and run compatibility check
 activate_fabric_env.bat
+```
+
+#### For PyEnv Environment:
+```batch
+REM Activate pyenv virtual environment and run compatibility check
+activate_fabric_env_pyenv.bat
 ```
 
 ### 5. Configure Parameters (Optional)
@@ -100,7 +123,9 @@ Check your Fabric workspace - all items should be deployed with folder structure
 
 🔧 ENVIRONMENT SETUP
 ├── setup.bat                     # Automated conda environment setup
-├── activate_fabric_env.bat       # Quick environment activation
+├── setup_pyenv.bat               # Automated pyenv + virtual environment setup
+├── activate_fabric_env.bat       # Quick conda environment activation
+├── activate_fabric_env_pyenv.bat # Quick pyenv environment activation
 └── requirements.txt              # Python dependencies
 
 🛠️  UTILITIES
