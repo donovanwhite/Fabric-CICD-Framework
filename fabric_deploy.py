@@ -271,6 +271,9 @@ Examples:
   
   # Local directory deployment (skip git clone)
   python fabric_deploy.py --workspace-id "your-workspace-id" --local-path "./my-fabric-items"
+  
+  # Using parameter file with local path deployment
+  python fabric_deploy.py --workspace-id "your-workspace-id" --local-path "./my-fabric-items" --parameter-file "parameter.yml"
         """
     )
     
