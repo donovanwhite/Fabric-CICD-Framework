@@ -29,20 +29,21 @@ def check_python_version():
         if major == 3 and minor >= 13:
             print("   Your Python is too new (3.13+)")
             print("   1. Install Python 3.12: https://www.python.org/downloads/")
-            print("   2. Use pyenv: pyenv install 3.12.7 && pyenv local 3.12.7")
-            print("   3. Use conda: conda create -n fabric-cicd python=3.12")
+            print("   2. Use pyenv: pyenv install 3.12.10 && pyenv local 3.12.10")
+            print("   3. Run setup_pyenv.bat for automated setup")
         elif major == 3 and minor < 9:
             print("   Your Python is too old (<3.9)")
             print("   1. Update Python: https://www.python.org/downloads/")
-            print("   2. Use pyenv: pyenv install 3.12.7 && pyenv local 3.12.7")
-            print("   3. Use conda: conda create -n fabric-cicd python=3.12")
+            print("   2. Use pyenv: pyenv install 3.12.10 && pyenv local 3.12.10")
+            print("   3. Run setup_pyenv.bat for automated setup")
         else:
             print("   You're not using Python 3")
             print("   1. Install Python 3.12: https://www.python.org/downloads/")
+            print("   2. Run setup_pyenv.bat for automated setup")
         
         print("\n📚 Documentation:")
         print("   - pyenv: https://github.com/pyenv/pyenv")
-        print("   - conda: https://docs.conda.io/projects/conda/")
+        print("   - setup guide: Run setup_pyenv.bat in this directory")
         
         return False
 

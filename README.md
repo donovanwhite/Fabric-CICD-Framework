@@ -47,28 +47,16 @@ This framework provides a **simple, tested approach** for deploying Microsoft Fa
 
 ## 🛠️ QUICK START
 
-### 1. Environment Setup (Choose Your Python Manager)
+### 1. Environment Setup
 
-#### Option A: Conda Environment (📝 May require admin privileges)
-```batch
-REM Windows: Run the automated conda setup script
-setup.bat
-```
-**📝 NOTE**: May require admin privileges to install conda in C:\ProgramData. If you encounter permission issues, try running as administrator.
-This script will:
-- ✅ Create a conda environment with Python 3.12
-- ✅ Install all dependencies from requirements.txt
-- ✅ Configure VS Code settings for the environment
-- ✅ Verify Python and fabric-cicd version compatibility
-- ✅ Test fabric-cicd installation
-
-#### Option B: PyEnv + Virtual Environment (✅ NO ADMIN REQUIRED - USER MODE)
+#### PyEnv + Virtual Environment (✅ NO ADMIN REQUIRED - USER MODE)
 ```batch
 REM Windows: Run the automated pyenv setup script (no admin privileges needed)
 setup_pyenv.bat
 ```
 **✅ USER-LEVEL INSTALLATION** - Perfect for non-admin users or restricted environments
 This script will:
+- ✅ Install Git if needed (winget or manual download)
 - ✅ Install pyenv-win if not available (user-level)
 - ✅ Install Python 3.12.10 via pyenv (user-level)
 - ✅ Create a virtual environment 'fabric-cicd-venv'
@@ -87,12 +75,6 @@ az login
 ```
 
 ### 4. Quick Environment Activation
-
-#### For Conda Environment:
-```batch
-REM Activate conda environment and run compatibility check
-activate_fabric_env.bat
-```
 
 #### For PyEnv Environment:
 ```batch
@@ -118,85 +100,37 @@ Check your Fabric workspace - all items should be deployed with folder structure
 
 ## 🔧 ENVIRONMENT SETUP GUIDE
 
-### Choose Your Python Environment Manager
+### Python Environment Management
 
-This project supports two Python environment management approaches to accommodate different user needs and system constraints.
+This project uses **PyEnv + Virtual Environment** for Python environment management. This approach is:
 
-#### 🐍 Option 1: Conda Environment (Recommended)
+**Perfect for:**
+- ✅ Non-admin users or restricted corporate environments
+- ✅ Users who DON'T have administrator privileges
+- ✅ Environments where traditional package managers are not allowed
+- ✅ Lightweight Python version management needs
 
-**Use when:**
-- ✅ You have Anaconda or Miniconda installed
-- ✅ You prefer comprehensive package management
-- ✅ You work with data science or scientific computing
-- ✅ You want the most reliable cross-platform experience
-
-**Pros:**
-- 🔧 Complete package management (Python + system libraries)
-- 🚀 Faster setup and dependency resolution
-- 📦 Better handling of complex dependencies
-- 🔄 Easy environment switching
-- 💪 Robust and mature ecosystem
-
-**Cons:**
-- 📁 Requires Anaconda/Miniconda installation (~400MB+)
-- 🚫 May not be allowed in some corporate environments
-- 💾 Uses more disk space
-
-#### 🎯 Option 2: PyEnv + Virtual Environment (User-Mode Only)
-
-**Use when:**
-- ✅ You cannot install Anaconda/Miniconda
-- ✅ You're in a restricted corporate environment
-- ✅ You DON'T have administrator privileges
-- ✅ You need user-level installations only
-- ✅ You prefer lightweight Python version management
-
-**Pros:**
+**Features:**
 - 🪶 Lightweight Python version management
-- 🔓 Works in restricted environments
+- 🔓 Works in restricted environments  
 - 👤 NO administrator privileges required
 - 🎛️ Fine-grained Python version control
 - 📦 Standard Python tooling (pip, venv)
 - 🏢 Perfect for corporate environments
 - 📁 All installations in user directories
 
-**Cons:**
-- ⏱️ Longer initial setup time
-- 🔧 More manual configuration required
-- 📋 Requires Git for pyenv-win installation
-- 🐛 Potentially more troubleshooting needed
-
-#### 📊 Quick Comparison
-
-| Feature | Conda | PyEnv + venv (User-Mode) |
-|---------|-------|--------------------------|
-| Installation Size | Large (~400MB+) | Small (~50MB) |
-| Setup Complexity | Simple | Moderate |
-| Corporate Friendly | Sometimes | Always |
-| Admin Required | Sometimes | Never |
-| Package Management | Excellent | Good |
-| Python Version Control | Good | Excellent |
-| Dependency Resolution | Excellent | Good |
-
-#### 🚀 Setup Recommendations
-
-1. **If you have admin privileges**: Try `setup.bat` (conda approach)
-2. **If you DON'T have admin privileges**: Use `setup_pyenv.bat` (user-mode pyenv approach)
-3. **If both fail**: Manual pip installation
-
-#### 🔄 Using Both Approaches
-
-You can have both environments set up simultaneously:
-- Conda environment: `activate_fabric_env.bat` (may require admin)
-- PyEnv environment: `activate_fabric_env_pyenv.bat` (user-mode only)
+**Requirements:**
+- 📋 Git (auto-installed by setup script if needed)
+- � ~50MB disk space for Python installation
+- 🔑 User-level write permissions to current directory
 
 #### 🆘 Troubleshooting
 
-**Conda Issues:**
-- Ensure Anaconda/Miniconda is properly installed
-- Check PATH environment variables
-- Run `conda info` to verify installation
-- May require administrator privileges
+**PyEnv Issues:**
+- Ensure Git is available (script will install if needed)
+- Check user-level write permissions to %USERPROFILE%\.pyenv
+- Restart command prompt after pyenv installation
+- Run `pyenv versions` to verify Python installation
 
 **PyEnv User-Mode Issues:**
 - Ensure Git is installed and accessible (no admin required)
@@ -249,9 +183,7 @@ If you encounter connection permission errors:
 └── fabric_deploy.py              # Comprehensive deployment script with all features
 
 🔧 ENVIRONMENT SETUP
-├── setup.bat                     # Automated conda environment setup
 ├── setup_pyenv.bat               # Automated pyenv + virtual environment setup
-├── activate_fabric_env.bat       # Quick conda environment activation
 ├── activate_fabric_env_pyenv.bat # Quick pyenv environment activation
 └── requirements.txt              # Python dependencies
 
