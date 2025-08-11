@@ -442,7 +442,6 @@ echo echo.
 echo REM Stay in the activated environment
 echo cmd /k
 ) > activate_fabric_env_pyenv.bat
-) > activate_fabric_env_pyenv.bat
 
 echo [OK] Created activate_fabric_env_pyenv.bat
 
@@ -541,5 +540,4 @@ echo    python fabric_deploy.py --workspace-id "your-workspace-id" --repo-url "r
 echo.
 echo [INFO] Replace "your-workspace-id" with your actual Fabric workspace GUID
 echo [INFO] Replace repository URLs with your actual Azure DevOps/GitHub repository
-echo [INFO] Remember to run 'activate_fabric_env_pyenv.bat' before deploying
 echo.
