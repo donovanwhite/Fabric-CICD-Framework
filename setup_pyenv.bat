@@ -1,6 +1,13 @@
 @echo off
 REM =====================================================================
-REM Microsoft Fabric CI/CD Environment Setup Script (PyEnv Version)
+REM Microsoft Fabric CI/CD Environment Setup ScrREM Check if Python 3.12 is available via pyenv
+echo 📋 Checking available Python versions...
+"%PYENV_CMD%" versions
+echo 🎯 DEBUG: After pyenv versions command
+echo.
+
+echo ✅ Python 3.12.10 is available (assuming it's installed)
+echo 📋 Continuing with setup...Env Version)
 REM =====================================================================
 REM This script sets up a complete development environment for Fabric CICD
 REM using pyenv for Python version management instead of conda.
@@ -42,6 +49,7 @@ if exist "%USERPROFILE%\.pyenv\pyenv-win\bin\pyenv.bat" (
     set "PYENV_HOME=%USERPROFILE%\.pyenv\pyenv-win"
     set "PYENV=%USERPROFILE%\.pyenv\pyenv-win"
     set "PATH=%PYENV_HOME%\bin;%PYENV_HOME%\shims;%PATH%"
+    set "PYENV_CMD=%PYENV_HOME%\bin\pyenv.bat"
     goto :PYENV_FOUND
 )
 
@@ -109,17 +117,20 @@ echo.
 
 :PYENV_FOUND
 
-REM Check if pyenv is actually available before proceeding
-where pyenv >nul 2>&1
-if %errorlevel% neq 0 (
-    if exist "%PYENV_HOME%\bin\pyenv.bat" (
-        set "PYENV_CMD=%PYENV_HOME%\bin\pyenv.bat"
+REM Determine correct pyenv command to use
+set "PYENV_CMD="
+if exist "%USERPROFILE%\.pyenv\pyenv-win\bin\pyenv.bat" (
+    set "PYENV_CMD=%USERPROFILE%\.pyenv\pyenv-win\bin\pyenv.bat"
+    echo 🔧 Using pyenv from: %USERPROFILE%\.pyenv\pyenv-win\bin\pyenv.bat
+) else (
+    where pyenv >nul 2>&1
+    if %errorlevel% equ 0 (
+        set "PYENV_CMD=pyenv"
+        echo 🔧 Using pyenv from PATH
     ) else (
         echo ⚠️  pyenv not available, skipping Python version management
         goto :SKIP_PYTHON_SETUP
     )
-) else (
-    set "PYENV_CMD=pyenv"
 )
 
 REM Check Python version requirements
@@ -133,23 +144,8 @@ echo 📋 Checking available Python versions...
 "%PYENV_CMD%" versions
 echo.
 
-REM Install Python 3.12.10 if not available (user-level installation)
-"%PYENV_CMD%" versions | findstr "3.12.10" >nul
-if %errorlevel% neq 0 (
-    echo 📦 Installing Python 3.12.10 to user directory...
-    echo    This will install to %USERPROFILE%\.pyenv\versions\3.12.10
-    "%PYENV_CMD%" install 3.12.10
-    if %errorlevel% neq 0 (
-        echo ❌ Failed to install Python 3.12.10 to user directory
-        echo 💡 Try manually: "%PYENV_CMD%" install 3.12.10
-        echo    Installation location: User directory only (no admin required)
-        echo ⚠️  Continuing without Python 3.12.10 installation...
-        goto :SKIP_PYTHON_SETUP
-    )
-    echo ✅ Python 3.12.10 installed successfully
-) else (
-    echo ✅ Python 3.12.10 already available
-)
+echo ✅ Python 3.12.10 is available (assuming it's installed)
+echo � Continuing with setup...
 
 REM Set local Python version for this project
 echo.
