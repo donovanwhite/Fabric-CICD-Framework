@@ -246,8 +246,7 @@ If you encounter connection permission errors:
 
 ```
 🚀 CORE DEPLOYMENT SCRIPTS
-├── fabric_deploy.py              # Main deployment script
-└── fabric_deploy_simple.py       # Simple deployment alternative
+└── fabric_deploy.py              # Comprehensive deployment script with all features
 
 🔧 ENVIRONMENT SETUP
 ├── setup.bat                     # Automated conda environment setup
