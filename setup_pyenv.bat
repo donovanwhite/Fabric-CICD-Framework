@@ -67,11 +67,101 @@ echo.
         del git_check.tmp
         echo ✅ Git found
     ) else (
-        echo ❌ Git is required to install pyenv-win
-        echo 💡 Please install Git first: https://git-scm.com/download/win
-        echo    Or download pyenv-win manually from: https://github.com/pyenv-win/pyenv-win
-        echo ⚠️  Continuing without pyenv installation...
-        goto :SKIP_PYENV_INSTALL
+        echo ❌ Git not found - installing automatically...
+        echo 💡 Installing Git (user-level installation)...
+        echo.
+        
+        REM Try winget first (Windows 10/11 package manager)
+        echo 🔍 Checking for winget availability...
+        winget --version > winget_check.tmp 2>&1
+        if exist winget_check.tmp (
+            del winget_check.tmp
+            echo ✅ winget found - installing Git via winget...
+            echo 📦 Running: winget install --id Git.Git --silent --scope user
+            winget install --id Git.Git --silent --scope user
+            if %errorlevel% equ 0 (
+                echo ✅ Git installed successfully via winget
+                echo 🔄 Refreshing environment variables...
+                
+                REM Add Git to PATH for current session
+                set "PATH=%USERPROFILE%\AppData\Local\Programs\Git\cmd;%PATH%"
+                
+                REM Verify installation
+                git --version > git_verify.tmp 2>&1
+                if exist git_verify.tmp (
+                    echo ✅ Git installation verified:
+                    type git_verify.tmp
+                    del git_verify.tmp
+                ) else (
+                    echo ⚠️  Git installed but may need system restart to be available
+                    echo 💡 Continue setup - pyenv installation will be attempted
+                )
+            ) else (
+                echo ❌ Git installation via winget failed
+                goto :TRY_MANUAL_GIT_INSTALL
+            )
+        ) else (
+            del winget_check.tmp 2>nul
+            echo ⚠️  winget not available - trying alternative installation...
+            goto :TRY_MANUAL_GIT_INSTALL
+        )
+        goto :GIT_INSTALL_COMPLETE
+        
+        :TRY_MANUAL_GIT_INSTALL
+        echo 💾 Downloading Git installer...
+        echo    This will download and install Git for Windows (user-level)
+        
+        REM Check if we have PowerShell for downloading
+        powershell -Command "Get-Host" > ps_check.tmp 2>&1
+        if exist ps_check.tmp (
+            del ps_check.tmp
+            echo � Downloading Git installer using PowerShell...
+            powershell -Command "& {Invoke-WebRequest -Uri 'https://github.com/git-for-windows/git/releases/download/v2.42.0.windows.2/Git-2.42.0.2-64-bit.exe' -OutFile 'Git-Installer.exe'}"
+            
+            if exist Git-Installer.exe (
+                echo ✅ Git installer downloaded
+                echo 📦 Installing Git (user-level, silent installation)...
+                echo    This may take a few minutes...
+                
+                REM Install Git silently with user-level installation
+                Git-Installer.exe /VERYSILENT /NORESTART /SP- /CURRENTUSER /COMPONENTS="ext,ext\shellhere,ext\guihere,gitlfs,assoc,assoc_sh"
+                
+                REM Wait a moment for installation to complete
+                timeout /t 10 /nobreak > nul
+                
+                REM Clean up installer
+                del Git-Installer.exe 2>nul
+                
+                REM Add Git to PATH for current session
+                set "PATH=%USERPROFILE%\AppData\Local\Programs\Git\cmd;%PATH%"
+                
+                REM Verify installation
+                git --version > git_verify.tmp 2>&1
+                if exist git_verify.tmp (
+                    echo ✅ Git installation successful:
+                    type git_verify.tmp
+                    del git_verify.tmp
+                ) else (
+                    echo ⚠️  Git installed but may need system restart to be available
+                    echo 💡 Continuing setup - pyenv installation will be attempted
+                )
+            ) else (
+                echo ❌ Failed to download Git installer
+                echo �💡 Please install Git manually: https://git-scm.com/download/win
+                echo ⚠️  Continuing without pyenv installation...
+                goto :SKIP_PYENV_INSTALL
+            )
+        ) else (
+            del ps_check.tmp 2>nul
+            echo ❌ PowerShell not available for downloading
+            echo 💡 Please install Git manually: https://git-scm.com/download/win
+            echo    Or download pyenv-win manually from: https://github.com/pyenv-win/pyenv-win
+            echo ⚠️  Continuing without pyenv installation...
+            goto :SKIP_PYENV_INSTALL
+        )
+        
+        :GIT_INSTALL_COMPLETE
+        echo.
     )
     
     REM Install pyenv-win to user directory
