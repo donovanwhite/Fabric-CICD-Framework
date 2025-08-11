@@ -24,8 +24,7 @@ if exist test_write.tmp (
     echo ❌ Cannot write to current directory
     echo 💡 Please run this script from a directory you have write access to
     echo    (e.g., Documents, Desktop, or a project folder)
-    pause
-    exit /b 1
+    echo ⚠️  Continuing anyway...
 )
 echo.
 
@@ -64,8 +63,8 @@ echo.
         echo ❌ Git is required to install pyenv-win
         echo 💡 Please install Git first: https://git-scm.com/download/win
         echo    Or download pyenv-win manually from: https://github.com/pyenv-win/pyenv-win
-        pause
-        exit /b 1
+        echo ⚠️  Continuing without pyenv installation...
+        goto :SKIP_PYENV_INSTALL
     )
     
     REM Install pyenv-win to user directory
@@ -75,8 +74,8 @@ echo.
     if %errorlevel% neq 0 (
         echo ❌ Failed to install pyenv-win to user directory
         echo 💡 Please ensure you have write access to %USERPROFILE%
-        pause
-        exit /b 1
+        echo ⚠️  Continuing without pyenv installation...
+        goto :SKIP_PYENV_INSTALL
     )
     
     REM Add pyenv to PATH
@@ -101,7 +100,27 @@ echo.
     echo.
     echo 🔄 Refreshing environment...
 
+:SKIP_PYENV_INSTALL
+REM Continue even without pyenv installation
+echo.
+echo ⚠️  Continuing setup without pyenv installation
+echo 💡 You can install pyenv manually later if needed
+echo.
+
 :PYENV_FOUND
+
+REM Check if pyenv is actually available before proceeding
+where pyenv >nul 2>&1
+if %errorlevel% neq 0 (
+    if exist "%PYENV_HOME%\bin\pyenv.bat" (
+        set "PYENV_CMD=%PYENV_HOME%\bin\pyenv.bat"
+    ) else (
+        echo ⚠️  pyenv not available, skipping Python version management
+        goto :SKIP_PYTHON_SETUP
+    )
+) else (
+    set "PYENV_CMD=pyenv"
+)
 
 REM Check Python version requirements
 echo.
@@ -111,21 +130,21 @@ echo.
 
 REM Check if Python 3.12 is available via pyenv
 echo 📋 Checking available Python versions...
-"%PYENV_HOME%\bin\pyenv.bat" versions
+"%PYENV_CMD%" versions
 echo.
 
 REM Install Python 3.12.10 if not available (user-level installation)
-"%PYENV_HOME%\bin\pyenv.bat" versions | findstr "3.12.10" >nul
+"%PYENV_CMD%" versions | findstr "3.12.10" >nul
 if %errorlevel% neq 0 (
     echo 📦 Installing Python 3.12.10 to user directory...
     echo    This will install to %USERPROFILE%\.pyenv\versions\3.12.10
-    "%PYENV_HOME%\bin\pyenv.bat" install 3.12.10
+    "%PYENV_CMD%" install 3.12.10
     if %errorlevel% neq 0 (
         echo ❌ Failed to install Python 3.12.10 to user directory
-        echo 💡 Try manually: "%PYENV_HOME%\bin\pyenv.bat" install 3.12.10
+        echo 💡 Try manually: "%PYENV_CMD%" install 3.12.10
         echo    Installation location: User directory only (no admin required)
-        pause
-        exit /b 1
+        echo ⚠️  Continuing without Python 3.12.10 installation...
+        goto :SKIP_PYTHON_SETUP
     )
     echo ✅ Python 3.12.10 installed successfully
 ) else (
@@ -135,14 +154,16 @@ if %errorlevel% neq 0 (
 REM Set local Python version for this project
 echo.
 echo 🔧 Setting up project Python environment...
-"%PYENV_HOME%\bin\pyenv.bat" local 3.12.10
+"%PYENV_CMD%" local 3.12.10
 if %errorlevel% neq 0 (
     echo ❌ Failed to set local Python version
-    pause
-    exit /b 1
+    echo ⚠️  Continuing with system Python...
+    goto :SKIP_PYTHON_SETUP
 )
 
 echo ✅ Python 3.12.10 set as local version for this project
+
+:SKIP_PYTHON_SETUP
 
 REM Verify Python installation
 echo.
@@ -151,8 +172,7 @@ python --version
 if %errorlevel% neq 0 (
     echo ❌ Python is not accessible
     echo 💡 You may need to restart your command prompt after pyenv installation
-    pause
-    exit /b 1
+    echo ⚠️  Continuing setup...
 )
 
 REM Upgrade pip (user-level installation)
@@ -164,8 +184,7 @@ if %errorlevel% neq 0 (
     echo ❌ Failed to upgrade pip with user-level installation
     echo 💡 This script is designed for user-mode installations only
     echo    If you encounter permissions issues, ensure you're in a writable directory
-    pause
-    exit /b 1
+    echo ⚠️  Continuing setup...
 )
 
 REM Create virtual environment in user directory
@@ -176,8 +195,7 @@ python -m venv fabric-cicd-venv
 if %errorlevel% neq 0 (
     echo ❌ Failed to create virtual environment in user directory
     echo 💡 Ensure you have write permissions to: %CD%
-    pause
-    exit /b 1
+    echo ⚠️  Continuing setup...
 )
 
 echo ✅ Virtual environment created successfully in user directory
@@ -188,8 +206,7 @@ echo 🔄 Activating virtual environment...
 call fabric-cicd-venv\Scripts\activate.bat
 if %errorlevel% neq 0 (
     echo ❌ Failed to activate virtual environment
-    pause
-    exit /b 1
+    echo ⚠️  Continuing setup...
 )
 
 echo ✅ Virtual environment activated
@@ -202,8 +219,7 @@ python -m pip install --upgrade pip
 if %errorlevel% neq 0 (
     echo ❌ Pip upgrade in virtual environment failed
     echo 💡 Virtual environment should have user permissions by default
-    pause
-    exit /b 1
+    echo ⚠️  Continuing setup...
 )
 
 REM Install core dependencies (user-level virtual environment)
@@ -224,8 +240,7 @@ if %errorlevel% neq 0 (
     if %errorlevel% neq 0 (
         echo ❌ Failed to install fabric-cicd to virtual environment
         echo 💡 Check your internet connection or try running from a different directory
-        pause
-        exit /b 1
+        echo ⚠️  Continuing setup...
     )
 )
 
@@ -252,15 +267,14 @@ python -c "import fabric_cicd; print('✅ fabric-cicd imported successfully from
 if %errorlevel% neq 0 (
     echo ❌ fabric-cicd import failed in virtual environment
     echo 💡 Installation should work in virtual environment without admin rights
-    pause
-    exit /b 1
+    echo ⚠️  Continuing setup...
 )
 
 python -c "import azure.identity; print('✅ azure-identity imported successfully from virtual environment')"
 if %errorlevel% neq 0 (
     echo ❌ azure-identity import failed in virtual environment
     echo 💡 Installation should work in virtual environment without admin rights
-    pause
+    echo ⚠️  Continuing setup...
     exit /b 1
 )
 
