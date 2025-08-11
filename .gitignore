@@ -76,4 +76,10 @@ temp_workspace/
 
 # Deprecated/removed files - prevent accidental recreation
 fabric_deploy_simple.py
+fabric_deploy_simple.*
 ENVIRONMENT_SETUP_GUIDE.md
+ENVIRONMENT_SETUP_GUIDE.*
+
+# Additional patterns to prevent recreation of deprecated files
+*fabric_deploy_simple*
+*ENVIRONMENT_SETUP_GUIDE*
