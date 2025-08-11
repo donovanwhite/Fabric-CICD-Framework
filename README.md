@@ -49,12 +49,12 @@ This framework provides a **simple, tested approach** for deploying Microsoft Fa
 
 ### 1. Environment Setup (Choose Your Python Manager)
 
-#### Option A: Conda Environment (⚠️ ADMIN PRIVILEGES REQUIRED)
+#### Option A: Conda Environment (📝 May require admin privileges)
 ```batch
-REM Windows: Run the automated conda setup script (RIGHT-CLICK "Run as administrator")
+REM Windows: Run the automated conda setup script
 setup.bat
 ```
-**⚠️ REQUIRES ADMINISTRATOR PRIVILEGES** - This script performs system-wide installation
+**📝 NOTE**: May require admin privileges to install conda in C:\ProgramData. If you encounter permission issues, try running as administrator.
 This script will:
 - ✅ Create a conda environment with Python 3.12
 - ✅ Install all dependencies from requirements.txt
