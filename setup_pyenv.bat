@@ -1,16 +1,17 @@
 @echo off
 REM =====================================================================
-REM Microsoft Fabric CI/CD Environment Setup ScrREM Check if Python 3.12 is available via pyenv
-echo 📋 Checking available Python versions...
-call "%PYENV_CMD%" versions
-echo.
-
-echo ✅ Python 3.12.10 is available 
-echo 📋 Continuing with setup...Env Version)
+REM Microsoft Fabric CI/CD Environment Setup Script (PyEnv Version)
 REM =====================================================================
 REM This script sets up a complete development environment for Fabric CICD
 REM using pyenv for Python version management instead of conda.
 REM Perfect for users who cannot install conda or prefer pyenv.
+REM 
+REM Features:
+REM - Automatic Git installation if not found (via winget or manual download)
+REM - User-level pyenv-win installation (no admin privileges required)
+REM - Python 3.12.10 installation and setup
+REM - Virtual environment creation and dependency installation
+REM - Complete fabric-cicd setup ready for deployment
 
 echo.
 echo 🚀 MICROSOFT FABRIC CI/CD ENVIRONMENT SETUP (PYENV - USER MODE)
@@ -18,6 +19,12 @@ echo ================================================================
 echo � This script is designed for NON-ADMIN users
 echo    All installations will be performed at user level
 echo    No administrator privileges required
+echo.
+echo ✨ Features:
+echo    - Automatic Git installation if needed (winget or direct download)
+echo    - PyEnv-win installation for Python version management
+echo    - Python 3.12.10 setup and virtual environment creation
+echo    - Complete fabric-cicd dependency installation
 echo.
 
 REM Test write permissions to current directory (user mode)
@@ -124,10 +131,10 @@ echo.
                 echo    This may take a few minutes...
                 
                 REM Install Git silently with user-level installation
-                Git-Installer.exe /VERYSILENT /NORESTART /SP- /CURRENTUSER /COMPONENTS="ext,ext\shellhere,ext\guihere,gitlfs,assoc,assoc_sh"
+                start /wait Git-Installer.exe /VERYSILENT /NORESTART /SP- /CURRENTUSER /COMPONENTS="ext,ext\shellhere,ext\guihere,gitlfs,assoc,assoc_sh"
                 
                 REM Wait a moment for installation to complete
-                timeout /t 10 /nobreak > nul
+                timeout /t 5 /nobreak > nul
                 
                 REM Clean up installer
                 del Git-Installer.exe 2>nul
