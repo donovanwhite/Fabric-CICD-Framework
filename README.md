@@ -49,11 +49,12 @@ This framework provides a **simple, tested approach** for deploying Microsoft Fa
 
 ### 1. Environment Setup (Choose Your Python Manager)
 
-#### Option A: Conda Environment (Recommended)
+#### Option A: Conda Environment (⚠️ ADMIN PRIVILEGES REQUIRED)
 ```batch
-REM Windows: Run the automated conda setup script
+REM Windows: Run the automated conda setup script (RIGHT-CLICK "Run as administrator")
 setup.bat
 ```
+**⚠️ REQUIRES ADMINISTRATOR PRIVILEGES** - This script performs system-wide installation
 This script will:
 - ✅ Create a conda environment with Python 3.12
 - ✅ Install all dependencies from requirements.txt
@@ -61,14 +62,15 @@ This script will:
 - ✅ Verify Python and fabric-cicd version compatibility
 - ✅ Test fabric-cicd installation
 
-#### Option B: PyEnv + Virtual Environment (For users who cannot install conda)
+#### Option B: PyEnv + Virtual Environment (✅ NO ADMIN REQUIRED - USER MODE)
 ```batch
-REM Windows: Run the automated pyenv setup script
+REM Windows: Run the automated pyenv setup script (no admin privileges needed)
 setup_pyenv.bat
 ```
+**✅ USER-LEVEL INSTALLATION** - Perfect for non-admin users or restricted environments
 This script will:
-- ✅ Install pyenv-win if not available
-- ✅ Install Python 3.12.10 via pyenv
+- ✅ Install pyenv-win if not available (user-level)
+- ✅ Install Python 3.12.10 via pyenv (user-level)
 - ✅ Create a virtual environment 'fabric-cicd-venv'
 - ✅ Install all dependencies from requirements.txt
 - ✅ Configure VS Code settings for the environment

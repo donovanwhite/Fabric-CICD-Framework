@@ -1,13 +1,45 @@
 @echo off
 REM =====================================================================
-REM Microsoft Fabric CI/CD Environment Setup Script
+REM Microsoft Fabric CI/CD Environment Setup Script (CONDA - ADMIN REQUIRED)
 REM =====================================================================
 REM This script sets up a complete development environment for Fabric CICD
 REM including conda environment, dependencies, and VS Code configuration.
+REM 
+REM ⚠️  ADMIN PRIVILEGES REQUIRED ⚠️
+REM This script requires administrator privileges to:
+REM - Install conda/miniconda system-wide
+REM - Configure system PATH variables
+REM - Install dependencies at system level
+REM 
+REM For NON-ADMIN users, please use setup_pyenv.bat instead
 
 echo.
-echo 🚀 MICROSOFT FABRIC CI/CD ENVIRONMENT SETUP
-echo ============================================
+echo 🚀 MICROSOFT FABRIC CI/CD ENVIRONMENT SETUP (CONDA - ADMIN MODE)
+echo =================================================================
+echo ⚠️  ADMIN PRIVILEGES REQUIRED
+echo    This script installs conda system-wide and requires administrator access
+echo    For non-admin users, please use setup_pyenv.bat instead
+echo.
+
+REM Check for administrator privileges
+echo 🔐 Checking for administrator privileges...
+net session >nul 2>&1
+if %errorlevel% neq 0 (
+    echo ❌ ADMIN PRIVILEGES REQUIRED
+    echo.
+    echo This script requires administrator privileges to:
+    echo - Install conda/miniconda system-wide
+    echo - Configure system PATH variables  
+    echo - Install dependencies at system level
+    echo.
+    echo 💡 SOLUTIONS:
+    echo    1. Right-click this script and select "Run as administrator"
+    echo    2. Use setup_pyenv.bat for user-level installation (no admin required)
+    echo.
+    pause
+    exit /b 1
+)
+echo ✅ Administrator privileges confirmed
 echo.
 
 REM Check if conda is available
