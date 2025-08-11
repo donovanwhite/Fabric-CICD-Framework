@@ -372,6 +372,27 @@ if %errorlevel% neq 0 (
     echo.
     echo ✅ All compatibility checks passed!
     echo.
+    echo 🚀 READY TO DEPLOY! Sample Commands:
+    echo =============================================
+    echo.
+    echo 📋 Basic deployment:
+    echo    python fabric_deploy.py --workspace-id "your-workspace-id" --repo-url "https://dev.azure.com/org/proj/_git/repo"
+    echo.
+    echo 🌿 Deploy from specific branch:
+    echo    python fabric_deploy.py --workspace-id "your-workspace-id" --repo-url "repo-url" --branch development
+    echo.
+    echo 🔐 Using service principal authentication:
+    echo    python fabric_deploy.py --workspace-id "your-workspace-id" --repo-url "repo-url" --client-id "sp-client-id" --client-secret "sp-secret" --tenant-id "tenant-id"
+    echo.
+    echo 📁 Deploy from local directory:
+    echo    python fabric_deploy.py --workspace-id "your-workspace-id" --local-path "./my-fabric-items"
+    echo.
+    echo 🧪 Dry run (analyze only):
+    echo    python fabric_deploy.py --workspace-id "your-workspace-id" --repo-url "repo-url" --dry-run
+    echo.
+    echo 💡 Replace "your-workspace-id" with your actual Fabric workspace GUID
+    echo 💡 Replace repository URLs with your actual Azure DevOps/GitHub repository
+    echo.
 )
 
 REM Keep the window open to show results

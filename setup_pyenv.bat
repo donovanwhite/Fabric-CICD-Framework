@@ -269,6 +269,30 @@ echo.
 echo 🔍 Running compatibility check...
 if exist "check_compatibility.py" (
     python check_compatibility.py
+    if %errorlevel% equ 0 (
+        echo.
+        echo 🚀 SETUP SUCCESSFUL! Ready to deploy - Sample Commands:
+        echo =============================================
+        echo.
+        echo 📋 Basic deployment:
+        echo    python fabric_deploy.py --workspace-id "your-workspace-id" --repo-url "https://dev.azure.com/org/proj/_git/repo"
+        echo.
+        echo 🌿 Deploy from specific branch:
+        echo    python fabric_deploy.py --workspace-id "your-workspace-id" --repo-url "repo-url" --branch development
+        echo.
+        echo 🔐 Using service principal authentication:
+        echo    python fabric_deploy.py --workspace-id "your-workspace-id" --repo-url "repo-url" --client-id "sp-client-id" --client-secret "sp-secret" --tenant-id "tenant-id"
+        echo.
+        echo 📁 Deploy from local directory:
+        echo    python fabric_deploy.py --workspace-id "your-workspace-id" --local-path "./my-fabric-items"
+        echo.
+        echo 🧪 Dry run (analyze only):
+        echo    python fabric_deploy.py --workspace-id "your-workspace-id" --repo-url "repo-url" --dry-run
+        echo.
+        echo 💡 Replace "your-workspace-id" with your actual Fabric workspace GUID
+        echo 💡 Replace repository URLs with your actual Azure DevOps/GitHub repository
+        echo.
+    )
 ) else (
     echo ⚠️  check_compatibility.py not found, skipping compatibility check
 )
@@ -395,3 +419,26 @@ echo 4. Contact your IT department if corporate policies block installations
 echo.
 
 echo ✅ Setup script completed!
+echo.
+echo 🚀 READY TO DEPLOY! Sample Commands:
+echo =============================================
+echo.
+echo 📋 Basic deployment:
+echo    python fabric_deploy.py --workspace-id "your-workspace-id" --repo-url "https://dev.azure.com/org/proj/_git/repo"
+echo.
+echo 🌿 Deploy from specific branch:
+echo    python fabric_deploy.py --workspace-id "your-workspace-id" --repo-url "repo-url" --branch development
+echo.
+echo 🔐 Using service principal authentication:
+echo    python fabric_deploy.py --workspace-id "your-workspace-id" --repo-url "repo-url" --client-id "sp-client-id" --client-secret "sp-secret" --tenant-id "tenant-id"
+echo.
+echo 📁 Deploy from local directory:
+echo    python fabric_deploy.py --workspace-id "your-workspace-id" --local-path "./my-fabric-items"
+echo.
+echo 🧪 Dry run (analyze only):
+echo    python fabric_deploy.py --workspace-id "your-workspace-id" --repo-url "repo-url" --dry-run
+echo.
+echo 💡 Replace "your-workspace-id" with your actual Fabric workspace GUID
+echo 💡 Replace repository URLs with your actual Azure DevOps/GitHub repository
+echo 💡 Remember to run 'activate_fabric_env_pyenv.bat' before deploying
+echo.
