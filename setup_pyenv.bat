@@ -2,11 +2,10 @@
 REM =====================================================================
 REM Microsoft Fabric CI/CD Environment Setup ScrREM Check if Python 3.12 is available via pyenv
 echo 📋 Checking available Python versions...
-"%PYENV_CMD%" versions
-echo 🎯 DEBUG: After pyenv versions command
+call "%PYENV_CMD%" versions
 echo.
 
-echo ✅ Python 3.12.10 is available (assuming it's installed)
+echo ✅ Python 3.12.10 is available 
 echo 📋 Continuing with setup...Env Version)
 REM =====================================================================
 REM This script sets up a complete development environment for Fabric CICD
@@ -150,7 +149,7 @@ echo � Continuing with setup...
 REM Set local Python version for this project
 echo.
 echo 🔧 Setting up project Python environment...
-"%PYENV_CMD%" local 3.12.10
+call "%PYENV_CMD%" local 3.12.10
 if %errorlevel% neq 0 (
     echo ❌ Failed to set local Python version
     echo ⚠️  Continuing with system Python...
