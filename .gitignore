@@ -73,3 +73,7 @@ Thumbs.db
 # Fabric workspace exports (temporary)
 workspace_export_*/
 temp_workspace/
+
+# Deprecated/removed files - prevent accidental recreation
+fabric_deploy_simple.py
+ENVIRONMENT_SETUP_GUIDE.md
