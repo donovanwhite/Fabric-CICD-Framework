@@ -1,69 +1,45 @@
-# Microsoft Fabric CI/CD Migration Framework
+# Documentation
 
-A comprehensive framework for deploying Microsoft Fabric items using CI/CD pipelines, built on fabric-cicd v0.1.29.
+This folder contains comprehensive documentation for the Fabric CI/CD Framework.
 
-> 📚 **Need more details?** For comprehensive troubleshooting, lessons learned, and advanced scenarios, see the **[📖 COMPLETE GUIDE](docs/COMPLETE_GUIDE.md)**
+## Documents
 
-## Directory Structure
+- **`README.md`** - Main documentation and getting started guide
+- **`COMPLETE_GUIDE.md`** - Comprehensive guide with troubleshooting and advanced features
 
+## Getting Started
 
+### Quick Overview
 
-```
-├── config/          # Configuration files and parameters
-├── core/            # Core deployment logic and utilities
-├── devops/          # CI/CD pipeline configurations
-├── docs/            # Documentation and guides
-├── envsetup/        # Environment setup scripts (includes requirements.txt)
-└── manual/          # Manual deployment and utility scripts
-```
+This framework provides a proven approach for deploying Microsoft Fabric items using fabric-cicd v0.1.29:
 
-## 🚀 Quick Start
+- **21 supported item types** - Complete coverage of Fabric resources
+- **Configuration-based deployment** - New v0.1.29 feature for streamlined operations
+- **Enhanced parameterization** - Environment-specific values and advanced substitution
+- **Modular architecture** - Organized codebase for maintainability
+- **CI/CD integration** - Ready-to-use Azure DevOps pipelines
 
-This framework provides a **simple, tested approach** for deploying Microsoft Fabric items using the `fabric-cicd` library. After extensive testing and troubleshooting, we've identified the approach that actually works.
+### Framework Highlights
 
-1. **Environment Setup**: Navigate to `envsetup/` and run the setup scripts
-
-2. **Configuration**: Configure your parameters in `config/` folder### 🔑 KEY SUCCESS FACTORS
-
-3. **Deployment**: Use scripts in `core/` for programmatic deployment or `manual/` for manual operations
-
-4. **CI/CD**: Use pipeline configurations in `devops/` for automated deployments1. **Use Simple `publish_all_items()` Function**
-
+1. **Use Simple `publish_all_items()` Function**
    - Follow the basic fabric-cicd documentation pattern
-
-## Documentation   - Avoid complex parameter.yml configurations that cause validation errors
-
+   - Avoid complex parameter.yml configurations that cause validation errors
    
-
-See the `docs/` folder for comprehensive documentation and guides.2. **NEW: Configuration-Based Deployment (v0.1.29)**
-
+2. **NEW: Configuration-Based Deployment (v0.1.29)**
    - Use `deploy_with_config()` for advanced scenarios
-
-## Requirements   - Centralized configuration with environment-specific settings
-
+   - Centralized configuration with environment-specific settings
    
-
-- Python 3.9-3.123. **Let fabric-cicd Handle Subdirectories Natively**
-
-- fabric-cicd >= 0.1.29   - Don't flatten repository structures
-
-- Azure DevOps access or Service Principal authentication   - fabric-cicd supports workspace subfolders out of the box
-
+3. **Let fabric-cicd Handle Subdirectories Natively**
+   - Don't flatten repository structures
+   - fabric-cicd supports workspace subfolders out of the box
    
-
-## Features4. **Support All 21 Item Types (v0.1.29)**
-
+4. **Support All 21 Item Types (v0.1.29)**
    - Auto-detect or manually specify item types
+   - Includes new ApacheAirflowJob and MountedDataFactory types
 
-- **Configuration-based deployment** using v0.1.29 features   - Includes new ApacheAirflowJob and MountedDataFactory types
-
-- **Enhanced parameterization** with environment-specific values
-
-- **21 supported item types** for comprehensive Fabric coverage5. **Enhanced Parameterization Features**
-
-- **Modular architecture** for maintainability and scalability   - Use `_ALL_` environment key for universal values
-
-- **CI/CD integration** with Azure DevOps pipelines   - Environment variable replacement with `$ENV:` prefix
+5. **Enhanced Parameterization Features**
+   - Use `_ALL_` environment key for universal values
+   - Environment variable replacement with `$ENV:` prefix
    - Advanced dynamic replacement variables
 
 6. **Use DefaultAzureCredential**
@@ -121,13 +97,13 @@ activate_fabric_env_pyenv.bat
 
 ### 5. Configure Parameters (Optional)
 For cross-environment deployments with parameterization:
-- See `config/parameter.yml` for comprehensive examples with real-world values
+- See `../config/parameter.yml` for comprehensive examples with real-world values
 - Copy and customize patterns that match your infrastructure
 - Supports all 19 fabric-cicd v0.1.24 item types
 
 ### 6. Deploy
 ```bash
-python core/fabric_deploy.py \
+python fabric_deploy.py \
     --workspace-id "your-workspace-id" \
     --repo-url "https://dev.azure.com/org/project/_git/repo"
 ```
@@ -217,8 +193,7 @@ If you encounter connection permission errors:
 
 ```
 🚀 CORE DEPLOYMENT SCRIPTS
-└── core/
-    └── fabric_deploy.py              # Comprehensive deployment script with all features
+└── fabric_deploy.py              # Comprehensive deployment script with all features
 
 🔧 ENVIRONMENT SETUP
 ├── setup_pyenv.bat               # Automated pyenv + virtual environment setup
@@ -230,13 +205,10 @@ If you encounter connection permission errors:
 └── validate_connections.py      # Connection validation
 
 📋 CONFIGURATION
-└── config/
-    ├── parameter.yml            # Parameter configuration with real examples
-    └── config.yml               # NEW: v0.1.29 configuration-based deployment
-
-🚀 CI/CD PIPELINES
-└── devops/
-    └── azure-pipelines.yml      # Azure DevOps pipeline
+├── parameter.yml                # Basic parameter file
+├── parameter.yml               # Parameter configuration with examples
+├── config.yml                   # NEW: v0.1.29 configuration-based deployment
+└── azure-pipelines.yml          # Azure DevOps pipeline
 
 🧪 TESTING
 └── test_hybrid_deployment.bat   # Test script
@@ -276,14 +248,14 @@ Our solution was developed through extensive testing:
 
 ### Basic Deployment
 ```bash
-python core/fabric_deploy.py \
+python fabric_deploy.py \
     --workspace-id "eb2f7de1-b2d5-4852-a744-735106d8dfe8" \
     --repo-url "https://dev.azure.com/contoso/FabricProject/_git/analytics"
 ```
 
 ### With Parameterization
 ```bash
-python core/fabric_deploy.py \
+python fabric_deploy.py \
     --workspace-id "your-workspace-id" \
     --repo-url "your-repo-url" \
     --environment PROD
@@ -292,14 +264,14 @@ python core/fabric_deploy.py \
 ### NEW: Configuration-Based Deployment (v0.1.29)
 ```bash
 # Use centralized config file for advanced deployment scenarios
-python core/fabric_deploy.py \
-    --config-file "config/config.yml" \
+python fabric_deploy.py \
+    --config-file "config.yml" \
     --environment prod
 ```
 
 ### Specific Branch
 ```bash
-python core/fabric_deploy.py \
+python fabric_deploy.py \
     --workspace-id "your-workspace-id" \
     --repo-url "your-repo-url" \
     --branch development
@@ -307,7 +279,7 @@ python core/fabric_deploy.py \
 
 ### Dry Run (Analysis Only)
 ```bash
-python core/fabric_deploy.py \
+python fabric_deploy.py \
     --workspace-id "your-workspace-id" \
     --repo-url "your-repo-url" \
     --dry-run
@@ -315,7 +287,7 @@ python core/fabric_deploy.py \
 
 ### Specific Item Types
 ```bash
-python core/fabric_deploy.py \
+python fabric_deploy.py \
     --workspace-id "your-workspace-id" \
     --repo-url "your-repo-url" \
     --item-types Notebook Lakehouse
@@ -323,7 +295,7 @@ python core/fabric_deploy.py \
 
 ## 📊 PARAMETERIZATION EXAMPLES
 
-The included `config/parameter.yml` demonstrates:
+The included `../config/parameter.yml` demonstrates:
 
 ### 🏢 **Real-World Scenarios**
 - **Retail Analytics Platform**: Complete DEV/UAT/PROD deployment examples
@@ -355,7 +327,7 @@ The framework now supports the new configuration-based deployment approach intro
 
 ```bash
 # Create a config.yml file (example provided)
-python core/fabric_deploy.py --config-file config/config.yml --environment prod
+python fabric_deploy.py --config-file config.yml --environment prod
 ```
 
 **Benefits:**
@@ -398,12 +370,12 @@ Now supports all **21 item types** including:
 
 **Current approach:**
 ```bash
-python core/fabric_deploy.py --workspace-id "id" --repo-url "url" --parameter-file config/parameter.yml
+python fabric_deploy.py --workspace-id "id" --repo-url "url" --parameter-file parameter.yml
 ```
 
 **New v0.1.29 approach:**
 ```bash
-python core/fabric_deploy.py --config-file config/config.yml --environment prod
+python fabric_deploy.py --config-file config.yml --environment prod
 ```
 
 The configuration file consolidates all settings and provides more powerful deployment control.
@@ -464,3 +436,5 @@ If you encounter issues:
 - ✅ **No manual intervention required**
 
 ---
+
+*This solution represents the culmination of extensive testing and troubleshooting to identify the approach that actually works with fabric-cicd library.*

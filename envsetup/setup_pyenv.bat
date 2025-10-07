@@ -4,7 +4,20 @@ REM Microsoft Fabric CI/CD Environment Setup Script (PyEnv Version)
 REM =====================================================================
 REM This script sets up a complete development environment for Fabric CICD
 REM using pyenv for Python version management.
-REM Perfect for users in restricted environments or without admin privileges.
+REM Perfect for users in restricecho [LIST] Basic deployment:
+echo    python ../core/fabric_deploy.py --workspace-id "your-workspace-id" --repo-url "https://dev.azure.com/org/proj/_git/repo"
+echo.
+echo [BRANCH] Deploy from specific branch:
+echo    python ../core/fabric_deploy.py --workspace-id "your-workspace-id" --repo-url "repo-url" --branch development
+echo.
+echo [AUTH] Using service principal authentication:
+echo    python ../core/fabric_deploy.py --workspace-id "your-workspace-id" --repo-url "repo-url" --client-id "sp-client-id" --client-secret "sp-secret" --tenant-id "tenant-id"
+echo.
+echo [FOLDER] Deploy from local directory:
+echo    python ../core/fabric_deploy.py --workspace-id "your-workspace-id" --local-path "./my-fabric-items"
+echo.
+echo [TEST] Dry run (analyze only):
+echo    python ../core/fabric_deploy.py --workspace-id "your-workspace-id" --repo-url "repo-url" --dry-run"ts or without admin privileges.
 REM 
 REM Features:
 REM - Automatic Git installation if not found (via winget or manual download)
@@ -313,46 +326,25 @@ if %errorlevel% neq 0 (
 
 REM Install core dependencies (user-level virtual environment)
 echo.
-echo [INSTALL] Installing core dependencies to virtual environment...
-echo    Installing to user virtual environment (no admin privileges required):
-echo    - fabric-cicd (latest version)
-echo    - azure-identity
-echo    - PyYAML
-echo    - packaging
-echo    - click
+echo [INSTALL] Installing dependencies from requirements.txt...
+echo    Installing to user virtual environment (no admin privileges required)
+echo    Using: %~dp0requirements.txt
 echo.
 
-pip install fabric-cicd --upgrade --force-reinstall
+pip install -r "%~dp0requirements.txt" --upgrade
 if %errorlevel% neq 0 (
-    echo [WARNING]  Failed to install fabric-cicd with force-reinstall, trying standard install...
-    pip install fabric-cicd --upgrade
-    if %errorlevel% neq 0 (
-        echo [ERROR] Failed to install fabric-cicd to virtual environment
-        echo [INFO] Check your internet connection or try running from a different directory
-        echo [WARNING]  Continuing setup...
-    )
-)
-
-pip install azure-identity PyYAML packaging click
-if %errorlevel% neq 0 (
-    echo [WARNING]  Failed to install some dependencies, trying individual installation...
+    echo [WARNING]  Failed to install from requirements.txt, trying individual packages...
+    echo [INSTALL] Installing fabric-cicd...
+    pip install fabric-cicd>=0.1.29 --upgrade
     echo [INSTALL] Installing azure-identity...
-    pip install azure-identity
+    pip install azure-identity>=1.15.0
     echo [INSTALL] Installing PyYAML...
-    pip install PyYAML
+    pip install PyYAML>=6.0
     echo [INSTALL] Installing packaging...
-    pip install packaging
+    pip install packaging>=21.0  
     echo [INSTALL] Installing click...
-    pip install click
+    pip install click>=8.0.0
     echo [WARNING]  Some dependencies may have failed, but continuing...
-)
-
-REM Fix potential cffi/cryptography issues by reinstalling
-echo.
-echo [SETUP] Ensuring cryptography dependencies are properly installed...
-pip install --upgrade --force-reinstall cffi cryptography
-if %errorlevel% neq 0 (
-    echo [WARNING]  Failed to reinstall cryptography dependencies, but continuing...
 )
 
 echo [OK] All dependencies installed successfully
@@ -425,7 +417,7 @@ echo set "PATH=%%PYENV_HOME%%\bin;%%PYENV_HOME%%\shims;%%PATH%%"
 echo echo [+] PyEnv location: %%PYENV_ROOT%% ^(user directory^)
 echo.
 echo REM Activate virtual environment ^(user directory^)
-echo call fabric-cicd-venv\Scripts\activate.bat
+echo call ..\fabric-cicd-venv\Scripts\activate.bat
 echo if %%errorlevel%% neq 0 ^(
 echo     echo [ERROR] Failed to activate virtual environment 'fabric-cicd-venv'
 echo     echo [INFO] Run setup_pyenv.bat first to create the user environment
@@ -434,16 +426,16 @@ echo     exit /b 1
 echo ^)
 echo.
 echo echo [OK] Environment activated: fabric-cicd-venv ^(PyEnv - User Mode^)
-echo echo [FOLDER] Virtual environment: %%CD%%\fabric-cicd-venv ^(user directory^)
+echo echo [FOLDER] Virtual environment: %%CD%%\..\fabric-cicd-venv ^(user directory^)
 echo echo.
-echo echo [INFO] You can now run: python fabric_deploy.py --help
+echo echo [INFO] You can now run: python ../core/fabric_deploy.py --help
 echo echo [CREATE] All installations are in user directories - no admin access required
 echo echo.
 echo REM Stay in the activated environment
 echo cmd /k
-) > activate_fabric_env_pyenv.bat
+) > "%~dp0activate_fabric_env_pyenv.bat"
 
-echo [OK] Created activate_fabric_env_pyenv.bat
+echo [OK] Created activate_fabric_env_pyenv.bat in envsetup folder
 
 REM Setup VS Code settings for pyenv
 echo.
@@ -484,7 +476,7 @@ echo [OK] Python 3.12.10 installed via pyenv (user directory)
 echo [OK] Virtual environment 'fabric-cicd-venv' created (user directory)
 echo [OK] fabric-cicd and dependencies installed (user virtual environment)
 echo [OK] VS Code configured for user environment
-echo [OK] Activation script created: activate_fabric_env_pyenv.bat
+echo [OK] Activation script created: envsetup/activate_fabric_env_pyenv.bat
 echo.
 echo [+] INSTALLATION LOCATIONS (All in user directories):
 echo    PyEnv: %USERPROFILE%\.pyenv
@@ -493,13 +485,13 @@ echo    Python Packages: Within virtual environment only
 echo.
 echo [+][LIST] NEXT STEPS:
 echo 1. Close and reopen your command prompt to ensure PATH changes take effect
-echo 2. Run: activate_fabric_env_pyenv.bat
-echo 3. Test with: python fabric_deploy.py --help
+echo 2. Run: envsetup\activate_fabric_env_pyenv.bat
+echo 3. Test with: python ../core/fabric_deploy.py --help
 echo.
 echo [INFO] USER-MODE INSTALLATION NOTES:
 echo - This installation requires NO administrator privileges
 echo - All files are installed in user directories only
-echo - Use 'activate_fabric_env_pyenv.bat' to activate this environment
+echo - Use 'envsetup\activate_fabric_env_pyenv.bat' to activate this environment
 echo - PyEnv manages Python versions in user space
 echo - Virtual environment isolates packages from system Python
 echo - Perfect for corporate/restricted environments

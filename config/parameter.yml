@@ -1,0 +1,178 @@
+# Microsoft Fabric CICD Parameter Configuration - v0.1.29 Features
+# ================================================================
+# This file demonstrates the features available in fabric-cicd v0.1.29
+# 
+# KEY v0.1.29 ENHANCEMENTS:
+# - _ALL_ environment key for universal values
+# - Environment variable replacement with $ENV: prefix  
+# - Enhanced dynamic replacement variables
+# - Improved file filters with wildcard support
+# - Support for all 21 officially supported item types
+
+# =============================================================================
+# NEW v0.1.29 FEATURES DEMONSTRATION
+# =============================================================================
+
+find_replace:
+  # =============================================================================
+  # 1. _ALL_ ENVIRONMENT KEY - Apply same value to all environments
+  # =============================================================================
+  
+  # Workspace ID replacement using _ALL_ (most common use case)
+  - find_value: "WORKSPACE_ID_PLACEHOLDER"
+    replace_value:
+      _ALL_: "$workspace.$id"  # Applies to any environment
+    file_path: "**/*.py"  # Enhanced wildcard support
+  
+  # Universal lakehouse reference
+  - find_value: "DEFAULT_LAKEHOUSE_PLACEHOLDER"
+    replace_value:
+      _ALL_: "$items.Lakehouse.MainDataLake.$id"
+    item_type: ["Notebook", "DataPipeline"]  # Multiple item types
+  
+  # =============================================================================
+  # 2. ENVIRONMENT VARIABLE REPLACEMENT - Use pipeline/system variables
+  # =============================================================================
+  
+  # Connection strings from environment variables
+  - find_value: "SQL_CONNECTION_PLACEHOLDER"
+    replace_value:
+      DEV: "$ENV:DEV_SQL_CONNECTION"
+      TEST: "$ENV:TEST_SQL_CONNECTION"
+      PROD: "$ENV:PROD_SQL_CONNECTION"
+    item_type: "DataPipeline"
+    file_path: "**/pipeline-content.json"
+  
+  # Storage account keys from Key Vault via environment variables
+  - find_value: "STORAGE_ACCOUNT_KEY_PLACEHOLDER"
+    replace_value:
+      DEV: "$ENV:DEV_STORAGE_KEY"
+      PROD: "$ENV:PROD_STORAGE_KEY"
+    item_name: ["DataIngestion", "DataProcessing"]  # Specific items only
+  
+  # =============================================================================
+  # 3. ENHANCED DYNAMIC REPLACEMENT - Advanced variable support
+  # =============================================================================
+  
+  # Cross-workspace references (new in v0.1.29)
+  - find_value: "SHARED_WORKSPACE_ID_PLACEHOLDER"
+    replace_value:
+      DEV: "$workspace.DevSharedWorkspace"  # Reference by name
+      PROD: "$workspace.ProdSharedWorkspace"
+    item_type: "Notebook"
+  
+  # Cross-workspace item references
+  - find_value: "SHARED_LAKEHOUSE_PLACEHOLDER"
+    replace_value:
+      DEV: "$workspace.DevSharedWorkspace.$items.Lakehouse.SharedData.$id"
+      PROD: "$workspace.ProdSharedWorkspace.$items.Lakehouse.SharedData.$id"
+    item_type: "DataPipeline"
+  
+  # SQL endpoint dynamic replacement
+  - find_value: "WAREHOUSE_ENDPOINT_PLACEHOLDER"
+    replace_value:
+      _ALL_: "$items.Warehouse.MainWarehouse.$sqlendpoint"
+    item_type: ["Notebook", "SemanticModel"]
+  
+  # Query service URI for Eventhouse
+  - find_value: "EVENTHOUSE_URI_PLACEHOLDER"
+    replace_value:
+      _ALL_: "$items.Eventhouse.MainEventhouse.$queryserviceuri"
+    item_type: ["KQLQueryset", "KQLDashboard"]
+  
+  # =============================================================================
+  # 4. REGEX PATTERN MATCHING - Advanced find/replace
+  # =============================================================================
+  
+  # Regex example: Replace GUID patterns in notebook metadata
+  - find_value: '# META\s+"default_lakehouse":\s*"([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})"'
+    replace_value:
+      _ALL_: "$items.Lakehouse.MainDataLake.$id"
+    is_regex: "true"  # Enable regex pattern matching
+    item_type: "Notebook"
+    file_path: "**/notebook-content.py"
+  
+  # =============================================================================
+  # 5. NEW ITEM TYPES SUPPORT - ApacheAirflowJob & MountedDataFactory
+  # =============================================================================
+  
+  # Apache Airflow Job parameterization
+  - find_value: "AIRFLOW_WORKSPACE_PLACEHOLDER"
+    replace_value:
+      _ALL_: "$workspace.$id"
+    item_type: "ApacheAirflowJob"
+  
+  # Airflow connection references
+  - find_value: "AIRFLOW_CONNECTION_ID_PLACEHOLDER"
+    replace_value:
+      DEV: "$ENV:DEV_AIRFLOW_CONN_ID"
+      PROD: "$ENV:PROD_AIRFLOW_CONN_ID"
+    item_type: "ApacheAirflowJob"
+  
+  # Mounted Data Factory resource references
+  - find_value: "ADF_RESOURCE_ID_PLACEHOLDER"
+    replace_value:
+      DEV: "$ENV:DEV_ADF_RESOURCE_ID"
+      PROD: "$ENV:PROD_ADF_RESOURCE_ID"
+    item_type: "MountedDataFactory"
+
+# =============================================================================
+# KEY-VALUE REPLACEMENT - Enhanced JSONPath support
+# =============================================================================
+
+key_value_replace:
+  # Pipeline connection replacement with environment variables
+  - find_key: "$.properties.activities[?(@.name=='Load Data')].typeProperties.source.datasetSettings.externalReferences.connection"
+    replace_value:
+      DEV: "$ENV:DEV_CONNECTION_ID"
+      PROD: "$ENV:PROD_CONNECTION_ID"
+    item_type: "DataPipeline"
+  
+  # Schedule enablement per environment
+  - find_key: "$.schedules[?(@.jobType=='Execute')].enabled"
+    replace_value:
+      DEV: false
+      TEST: true
+      PROD: true
+    file_path: "**/.schedules"  # Wildcard file pattern
+
+# =============================================================================
+# SPARK POOL CONFIGURATION - Enhanced environment support
+# =============================================================================
+
+spark_pool:
+  # Multi-environment Spark pool configuration
+  - instance_pool_id: "pool-dev-12345"
+    replace_value:
+      DEV:
+        type: "Workspace"
+        name: "DevPool-Small"
+      TEST:
+        type: "Capacity"
+        name: "TestPool-Medium"
+      PROD:
+        type: "Capacity"  
+        name: "ProdPool-Large"
+    item_name: ["DataScience", "Analytics"]  # Multiple environments
+  
+  # Universal pool for all environments
+  - instance_pool_id: "pool-shared-67890"
+    replace_value:
+      _ALL_:  # New _ALL_ support in spark_pool
+        type: "Capacity"
+        name: "SharedPool-Standard"
+    item_name: "SharedEnvironment"
+
+# =============================================================================
+# USAGE EXAMPLES
+# =============================================================================
+#
+# Standard deployment with this parameter file:
+# python fabric_deploy.py --workspace-id "your-id" --repo-url "your-repo" --parameter-file parameter.yml --environment PROD
+#
+# With environment variables set:
+# export DEV_SQL_CONNECTION="dev-server.database.windows.net"
+# export PROD_SQL_CONNECTION="prod-server.database.windows.net"
+# python fabric_deploy.py --workspace-id "your-id" --repo-url "your-repo" --parameter-file parameter.yml --environment PROD
+#
+# =============================================================================

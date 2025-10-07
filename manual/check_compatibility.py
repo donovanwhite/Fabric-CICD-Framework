@@ -148,15 +148,15 @@ def main():
         print("🎉 All checks passed! Your environment is ready for Fabric CICD.")
         print("\n🚀 Next steps:")
         print("   1. Authenticate: az login")
-        print("   2. Test deployment: python fabric_deploy.py --help")
-        print("   3. Run deployment: python fabric_deploy.py --workspace-id <id> --repo-url <url>")
+        print("   2. Test deployment: python ../core/fabric_deploy.py --help")
+        print("   3. Run deployment: python ../core/fabric_deploy.py --workspace-id <id> --repo-url <url>")
     else:
         print("⚠️  Some compatibility issues found.")
         print("💡 Please address the issues above before running Fabric CICD.")
         print("\n🔧 Quick fixes:")
         print("   • Update Python: Use Python 3.8-3.12")
         print("   • Upgrade fabric-cicd: pip install --upgrade fabric-cicd")
-        print("   • Install dependencies: pip install -r requirements.txt")
+        print("   • Install dependencies: pip install -r ../envsetup/requirements.txt")
         
     print(f"\n📊 Check results: {sum(checks)}/{len(checks)} passed")
     

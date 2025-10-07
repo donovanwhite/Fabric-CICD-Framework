@@ -218,7 +218,7 @@ Based on our testing with 8 Fabric items:
 
 ## 📋 PARAMETERIZATION GUIDE
 
-For cross-environment deployments, we've included `parameter_example.yml` with comprehensive real-world examples.
+For cross-environment deployments, we've included `parameter.yml` with comprehensive real-world examples.
 
 ### 🌟 **When to Use Parameterization**
 - **Multi-environment deployments** (DEV → UAT → PROD)

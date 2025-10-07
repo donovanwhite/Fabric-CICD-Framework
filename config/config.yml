@@ -1,0 +1,148 @@
+# Microsoft Fabric CI/CD Configuration File - v0.1.29
+# ====================================================
+# This file supports the new configuration-based deployment feature in v0.1.29
+# 
+# Usage: python fabric_deploy.py --config-file config.yml --environment dev
+#
+# This approach centralizes all deployment settings in a single file and
+# simplifies deployment to one function call using deploy_with_config()
+
+# =============================================================================
+# CORE SETTINGS (REQUIRED)
+# =============================================================================
+core:
+  # Workspace configuration - choose either workspace_id or workspace_name
+  workspace_id:
+    dev: "your-dev-workspace-id-here"
+    test: "your-test-workspace-id-here"  
+    prod: "your-prod-workspace-id-here"
+  
+  # Alternative: Use workspace names instead of IDs
+  # workspace:
+  #   dev: "Fabric-Dev-Engineering"
+  #   test: "Fabric-Test-Engineering"
+  #   prod: "Fabric-Prod-Engineering"
+
+  # Repository directory - supports relative or absolute paths
+  repository_directory: "."  # Current directory (relative to config.yml)
+  
+  # Alternative: Environment-specific repository directories
+  # repository_directory:
+  #   dev: "./dev-items"
+  #   test: "./test-items"
+  #   prod: "./prod-items"
+
+  # Item types to deploy - if omitted, all supported types will be deployed
+  item_types_in_scope:
+    - Notebook
+    - DataPipeline
+    - Environment
+    - Lakehouse
+    - Warehouse
+    - SemanticModel
+    - Report
+    - Dataflow
+    # Add other item types as needed:
+    # - ApacheAirflowJob
+    # - MountedDataFactory
+    # - KQLDatabase
+    # - Eventstream
+    # - etc.
+
+  # Parameter file for environment-specific replacements (optional)
+  parameter: "parameter.yml"  # Relative to config.yml location
+
+# =============================================================================
+# PUBLISH SETTINGS (OPTIONAL)
+# =============================================================================
+publish:
+  # Exclude items matching this regex pattern
+  exclude_regex: "^(TEMP_|DEBUG_|_ARCHIVE)"
+  
+  # Exclude items in specific folders
+  folder_exclude_regex: "^(archive/|temp/|debug/)"
+  
+  # Skip publishing for specific environments
+  skip:
+    dev: false    # Deploy to dev
+    test: false   # Deploy to test
+    prod: false   # Deploy to prod
+  
+  # Experimental: Deploy only specific items (requires feature flags)
+  # items_to_include:
+  #   - "Main Analytics.Notebook"
+  #   - "Data Pipeline.DataPipeline"
+
+# =============================================================================
+# UNPUBLISH SETTINGS (OPTIONAL)
+# =============================================================================
+unpublish:
+  # Exclude items from unpublishing (keep orphaned items matching this pattern)
+  exclude_regex: "^(KEEP_|SHARED_|SYSTEM_)"
+  
+  # Skip unpublishing for specific environments
+  skip:
+    dev: false    # Remove orphaned items in dev
+    test: false   # Remove orphaned items in test
+    prod: true    # Don't remove orphaned items in prod (safety)
+
+# =============================================================================
+# FEATURE FLAGS (OPTIONAL)
+# =============================================================================
+features:
+  # Enable experimental features for advanced functionality
+  - enable_experimental_features
+  - enable_config_deploy
+  
+  # Additional feature flags (uncomment as needed)
+  # - enable_shortcut_publish          # For Lakehouse shortcuts
+  # - enable_lakehouse_unpublish       # Allow Lakehouse deletion
+  # - enable_warehouse_unpublish       # Allow Warehouse deletion
+  # - enable_sqldatabase_unpublish     # Allow SQL Database deletion
+  # - enable_eventhouse_unpublish      # Allow Eventhouse deletion
+  # - enable_items_to_include          # Enable selective deployment
+  # - enable_exclude_folder            # Enable folder exclusion
+  # - enable_response_collection       # Collect API responses
+  # - enable_environment_variable_replacement  # Enable $ENV: variables
+
+# =============================================================================
+# CONSTANTS (OPTIONAL)
+# =============================================================================
+constants:
+  # Override library constants if needed
+  DEFAULT_API_ROOT_URL: "https://api.fabric.microsoft.com"
+  
+  # Environment-specific constants
+  # MAX_RETRY_COUNT:
+  #   dev: 3
+  #   test: 5
+  #   prod: 10
+
+# =============================================================================
+# EXAMPLE USAGE COMMANDS
+# =============================================================================
+# 
+# Basic deployment:
+# python fabric_deploy.py --config-file config.yml --environment dev
+#
+# With service principal authentication:
+# python fabric_deploy.py --config-file config.yml --environment prod \
+#   --client-id "your-sp-client-id" \
+#   --client-secret "your-sp-secret" \
+#   --tenant-id "your-tenant-id"
+#
+# Dry run (analysis only):
+# python fabric_deploy.py --config-file config.yml --environment test --dry-run
+#
+# =============================================================================
+# BENEFITS OF CONFIGURATION-BASED DEPLOYMENT
+# =============================================================================
+#
+# 1. Centralized Configuration: All settings in one file
+# 2. Environment Management: Easy environment-specific settings
+# 3. Simplified Deployment: Single function call
+# 4. Advanced Features: Access to latest v0.1.29 capabilities
+# 5. Validation: Built-in configuration validation
+# 6. Override Support: Runtime configuration overrides
+#
+# =============================================================================

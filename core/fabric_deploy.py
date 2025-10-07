@@ -57,7 +57,7 @@ from pathlib import Path
 try:
     from git import Repo
     from azure.identity import DefaultAzureCredential
-    from fabric_cicd import FabricWorkspace, publish_all_items
+    from fabric_cicd import FabricWorkspace, publish_all_items, deploy_with_config
     import fabric_cicd
 except ImportError as e:
     print(f"❌ Missing required dependency: {e}")
@@ -80,7 +80,7 @@ def check_version_compatibility():
     # Check fabric-cicd version
     try:
         from packaging import version
-        required_version = "0.1.24"
+        required_version = "0.1.29"
         current_version = fabric_cicd.__version__
         
         if version.parse(current_version) < version.parse(required_version):
@@ -118,8 +118,17 @@ def analyze_repository(repo_path):
         '.Dataflow': 'Dataflow',
         '.KQLDatabase': 'KQLDatabase',
         '.KQLQueryset': 'KQLQueryset',
-        '.MLModel': 'MLModel',
-        '.MLExperiment': 'MLExperiment'
+        '.MirroredDatabase': 'MirroredDatabase',
+        '.VariableLibrary': 'VariableLibrary',
+        '.CopyJob': 'CopyJob',
+        '.Eventhouse': 'Eventhouse',
+        '.Reflex': 'Reflex',
+        '.Eventstream': 'Eventstream',
+        '.SQLDatabase': 'SQLDatabase',
+        '.KQLDashboard': 'KQLDashboard',
+        '.GraphQLApi': 'GraphQLApi',
+        '.ApacheAirflowJob': 'ApacheAirflowJob',
+        '.MountedDataFactory': 'MountedDataFactory'
     }
     
     found_types = set()
@@ -163,7 +172,17 @@ def deploy_with_error_handling(workspace):
         return result
         
     except Exception as bulk_error:
-        print(f"⚠️  Bulk deployment failed: {bulk_error}")
+        error_msg = str(bulk_error)
+        if "Cannot find the KQL Database source" in error_msg:
+            print("⚠️  Bulk deployment failed: KQL Dashboard database reference issue")
+            print("💡 Most items were likely deployed successfully")
+            print(f"🔍 Specific error: {error_msg}")
+        elif "ParsingError" in error_msg:
+            print("⚠️  Bulk deployment failed: Item configuration issue")
+            print(f"🔍 Details: {error_msg}")
+        else:
+            print(f"⚠️  Bulk deployment failed: {error_msg}")
+        
         print("🔄 Switching to individual item deployment with error handling...")
         print()
         
@@ -173,8 +192,7 @@ def deploy_with_error_handling(workspace):
             item_types_to_try = [
                 'datapipelines', 'notebooks', 'reports', 'datasets', 
                 'dataflows', 'lakehouses', 'warehouses', 'semanticmodels',
-                'dashboards', 'datamart', 'kqlqueries', 'mlmodels',
-                'mlexperiments', 'sparkjobdefinitions'
+                'dashboards', 'datamart', 'kqlqueries', 'sparkjobdefinitions'
             ]
             
             for item_type in item_types_to_try:
@@ -261,7 +279,7 @@ Examples:
   python fabric_deploy.py --workspace-id "your-workspace-id" --repo-url "repo-url" --client-id "sp-client-id" --client-secret "sp-secret" --tenant-id "tenant-id"
   
   # Using parameter file for configuration
-  python fabric_deploy.py --workspace-id "your-workspace-id" --repo-url "repo-url" --parameter-file "parameter.yml"
+  python fabric_deploy.py --workspace-id "your-workspace-id" --repo-url "repo-url" --parameter-file "../config/parameter.yml"
   
   # Dry run (analyze only)
   python fabric_deploy.py --workspace-id "your-workspace-id" --repo-url "repo-url" --dry-run
@@ -273,7 +291,13 @@ Examples:
   python fabric_deploy.py --workspace-id "your-workspace-id" --local-path "./my-fabric-items"
   
   # Using parameter file with local path deployment
-  python fabric_deploy.py --workspace-id "your-workspace-id" --local-path "./my-fabric-items" --parameter-file "parameter.yml"
+  python fabric_deploy.py --workspace-id "your-workspace-id" --local-path "./my-fabric-items" --parameter-file "../config/parameter.yml"
+  
+  # NEW v0.1.29: Configuration-based deployment
+  python fabric_deploy.py --config-file "../config/config.yml" --environment prod
+  
+  # Configuration-based deployment with service principal
+  python fabric_deploy.py --config-file "../config/config.yml" --environment prod --client-id "sp-client-id" --client-secret "sp-secret" --tenant-id "tenant-id"
         """
     )
     
@@ -286,7 +310,11 @@ Examples:
     parser.add_argument('--branch', default='main',
                        help='Git branch to deploy from (default: main)')
     parser.add_argument('--parameter-file',
-                       help='Path to parameter.yml file for configuration')
+                       help='Path to parameter.yml file for configuration (default: ../config/parameter.yml)')
+    parser.add_argument('--config-file',
+                       help='Path to config.yml file for configuration-based deployment (default: ../config/config.yml)')
+    parser.add_argument('--environment',
+                       help='Environment name for configuration-based deployment (e.g., dev, test, prod)')
     parser.add_argument('--client-id',
                        help='Service Principal client ID for authentication')
     parser.add_argument('--client-secret',
@@ -311,6 +339,13 @@ Examples:
     sp_params = [args.client_id, args.client_secret, args.tenant_id]
     if any(sp_params) and not all(sp_params):
         parser.error("Service principal authentication requires --client-id, --client-secret, and --tenant-id")
+    
+    # Configuration-based deployment validation
+    if args.config_file and not args.environment:
+        parser.error("Configuration-based deployment requires --environment parameter")
+    
+    if args.config_file and (args.parameter_file or args.item_types):
+        print("⚠️  Warning: --config-file will override --parameter-file and --item-types settings")
     
     # Check version compatibility first
     check_version_compatibility()
@@ -343,7 +378,11 @@ Examples:
         else:
             print(f"🔐 Authentication: DefaultAzureCredential")
             
-        if args.parameter_file:
+        if args.config_file:
+            print(f"📋 Config file: {args.config_file}")
+            print(f"🌍 Environment: {args.environment}")
+            print(f"🆕 Using v0.1.29 configuration-based deployment")
+        elif args.parameter_file:
             print(f"📋 Parameter file: {args.parameter_file}")
             
         print(f"🧪 Dry run: {args.dry_run}")
@@ -408,6 +447,57 @@ Examples:
                 sys.exit(1)
         print()
         
+        # Handle configuration-based deployment (v0.1.29 feature)
+        if args.config_file:
+            print("🆕 USING CONFIGURATION-BASED DEPLOYMENT (v0.1.29)")
+            print("=" * 60)
+            
+            if args.dry_run:
+                print("🧪 DRY RUN - Configuration-based deployment analysis")
+                print(f"📋 Config file: {args.config_file}")
+                print(f"🌍 Environment: {args.environment}")
+                print("💡 Would use deploy_with_config() function")
+                return
+            
+            try:
+                # Set up authentication for configuration-based deployment
+                if args.client_id:
+                    from azure.identity import ClientSecretCredential
+                    credential = ClientSecretCredential(
+                        tenant_id=args.tenant_id,
+                        client_id=args.client_id,
+                        client_secret=args.client_secret
+                    )
+                    print("🔐 Using Service Principal with configuration-based deployment")
+                else:
+                    credential = None
+                    print("🔐 Using DefaultAzureCredential with configuration-based deployment")
+                
+                print(f"🚀 Deploying using config file: {args.config_file}")
+                print(f"🌍 Target environment: {args.environment}")
+                
+                # Execute configuration-based deployment
+                deploy_with_config(
+                    config_file_path=args.config_file,
+                    environment=args.environment,
+                    token_credential=credential
+                )
+                
+                print("✅ CONFIGURATION-BASED DEPLOYMENT COMPLETED!")
+                print("🎉 Your Fabric items should now be visible in the workspace!")
+                print("💡 Check your Fabric workspace to verify the deployment.")
+                return
+                
+            except Exception as e:
+                print(f"❌ Configuration-based deployment failed: {e}")
+                print("💡 Check:")
+                print("   - Config file path is correct")
+                print("   - Environment name matches config file")
+                print("   - YAML syntax is valid")
+                print("   - Authentication is properly configured")
+                sys.exit(1)
+        
+        # Continue with standard deployment approach        
         # Analyze repository structure
         item_types, total_items = analyze_repository(repo_path)
         
@@ -454,9 +544,15 @@ Examples:
             # Initialize workspace with authentication
             workspace_params = {
                 'workspace_id': args.workspace_id,
-                'repository_directory': repo_path,
-                'item_type_in_scope': item_types
+                'repository_directory': repo_path
             }
+            
+            # Only limit scope if user explicitly specified item types
+            if args.item_types:
+                workspace_params['item_type_in_scope'] = item_types
+                print(f"🎯 Limiting deployment to specified item types: {item_types}")
+            else:
+                print("🌐 Deploying ALL item types found in repository")
             
             # FabricWorkspace will automatically use environment variables for auth
             workspace = FabricWorkspace(**workspace_params)
@@ -472,7 +568,10 @@ Examples:
         print(f"✅ FabricWorkspace initialized successfully")
         print(f"   📁 Repository directory: {repo_path}")
         print(f"   🎯 Workspace ID: {args.workspace_id}")
-        print(f"   📦 Item types in scope: {item_types}")
+        if args.item_types:
+            print(f"   📦 Item types in scope: {item_types}")
+        else:
+            print(f"   📦 Item types found: {item_types} (all will be deployed)")
         print()
         
         # Execute deployment using enhanced error handling
@@ -493,16 +592,40 @@ Examples:
             
         except Exception as e:
             print(f"❌ Deployment failed: {e}")
-            print("📋 Full error details:")
-            import traceback
-            traceback.print_exc()
             print()
-            print("💡 Common issues:")
-            print("   - Workspace permissions (need Admin or Member role)")
-            print("   - Authentication expired (try az login)")
-            print("   - Network connectivity issues")
-            print("   - Connection access issues (check item-specific permissions)")
-            print("   - User needs access to connections used in data pipelines")
+            
+            # Extract user-friendly error message from the exception
+            error_message = str(e)
+            if "ParsingError" in error_message and "Cannot find the KQL Database source" in error_message:
+                print("🔍 Issue: KQL Dashboard database reference mismatch")
+                print("💡 The KQL Dashboard references a database that doesn't exist or has a different name")
+                print("💡 Most other items were likely deployed successfully")
+                print("💡 Check your workspace - you should see deployed items")
+                print()
+                print("🛠️  To fix:")
+                print("   - Update the KQL Dashboard definition in your source repository")
+                print("   - Or ensure the database name matches what the dashboard expects")
+            elif "authentication" in error_message.lower() or "credential" in error_message.lower():
+                print("🔐 Issue: Authentication problem")
+                print("💡 Try: az login")
+            elif "permission" in error_message.lower() or "access" in error_message.lower():
+                print("🔒 Issue: Workspace permissions")
+                print("💡 Ensure you have Admin or Member role in the workspace")
+            else:
+                print("💡 Common issues to check:")
+                print("   - Workspace permissions (need Admin or Member role)")
+                print("   - Authentication (try: az login)")
+                print("   - Network connectivity")
+                print("   - Item dependencies and naming conflicts")
+            
+            print()
+            print("🎯 Important: Check your Fabric workspace - many items may have deployed successfully")
+            print("           even if the overall deployment reported failure!")
+            print()
+            print("📋 Quick Check:")
+            print(f"   1. Open your Fabric workspace: {args.workspace_id}")
+            print("   2. Look for recently updated items")
+            print("   3. Most items (except problematic ones) should be there")
             sys.exit(1)
         
     except KeyboardInterrupt:

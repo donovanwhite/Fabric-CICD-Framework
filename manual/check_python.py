@@ -52,9 +52,9 @@ if __name__ == "__main__":
     
     if is_compatible:
         print("\n🚀 Next steps:")
-        print("   1. Run: pip install -r requirements.txt")
+        print("   1. Run: pip install -r ../envsetup/requirements.txt")
         print("   2. Or run: setup.bat")
-        print("   3. Configure parameter.yml")
+        print("   3. Configure ../config/parameter.yml")
         print("   4. Test: python fabric_deploy_local.py --help")
     else:
         print("\n⚠️  Please fix Python version before proceeding")

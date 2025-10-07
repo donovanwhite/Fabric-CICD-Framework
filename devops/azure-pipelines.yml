@@ -1,6 +1,6 @@
 # Azure DevOps Pipeline for Microsoft Fabric CI/CD
-# Based on successful testing with fabric-cicd library
-# This pipeline uses the SIMPLE approach
+# Updated for fabric-cicd v0.1.29 with configuration-based deployment support
+# Supports both traditional and new configuration-based approaches
 
 trigger:
 - main
@@ -17,6 +17,12 @@ variables:
   # Repository Configuration (automatically populated by Azure DevOps)
   REPO_URL: $(Build.Repository.Uri)
   BRANCH_NAME: $(Build.SourceBranchName)
+  
+  # v0.1.29 Configuration-based deployment options
+  # Set USE_CONFIG_DEPLOYMENT to 'true' to use config/config.yml approach
+  USE_CONFIG_DEPLOYMENT: 'false'  # Change to 'true' to enable
+  CONFIG_FILE: 'config/config.yml'
+  ENVIRONMENT_NAME: 'prod'  # Environment name for config-based deployment
 
 stages:
 - stage: Validate
@@ -37,7 +43,7 @@ stages:
 
     - script: |
         echo "🔍 Validating repository structure..."
-        python fabric_deploy.py \
+        python core/fabric_deploy.py \
           --workspace-id "$(FABRIC_WORKSPACE_ID)" \
           --repo-url "$(REPO_URL)" \
           --branch "$(BRANCH_NAME)" \
@@ -77,11 +83,21 @@ stages:
               echo "Repository: $(REPO_URL)"
               echo "Branch: $(BRANCH_NAME)" 
               echo "Workspace: $(FABRIC_WORKSPACE_ID)"
+              echo "Config-based deployment: $(USE_CONFIG_DEPLOYMENT)"
               echo ""
-              python fabric_deploy.py \
-                --workspace-id "$(FABRIC_WORKSPACE_ID)" \
-                --repo-url "$(REPO_URL)" \
-                --branch "$(BRANCH_NAME)"
+              
+              if [ "$(USE_CONFIG_DEPLOYMENT)" = "true" ]; then
+                echo "🆕 Using v0.1.29 Configuration-based deployment"
+                python core/fabric_deploy.py \
+                  --config-file "$(CONFIG_FILE)" \
+                  --environment "$(ENVIRONMENT_NAME)"
+              else
+                echo "📦 Using traditional deployment approach"
+                python core/fabric_deploy.py \
+                  --workspace-id "$(FABRIC_WORKSPACE_ID)" \
+                  --repo-url "$(REPO_URL)" \
+                  --branch "$(BRANCH_NAME)"
+              fi
             displayName: 'Deploy Fabric Items'
             env:
               AZURE_CLIENT_ID: $(AZURE_CLIENT_ID)
@@ -115,7 +131,7 @@ stages:
     - script: |
         echo "🔍 Validating PR changes..."
         echo "This is a Pull Request validation - no deployment will occur"
-        python fabric_deploy.py \
+        python core/fabric_deploy.py \
           --workspace-id "$(FABRIC_WORKSPACE_ID)" \
           --repo-url "$(REPO_URL)" \
           --branch "$(System.PullRequest.SourceBranch)" \

@@ -16,7 +16,7 @@ class ConnectionValidator:
     
     def __init__(self, repository_path: str):
         self.repository_path = Path(repository_path)
-        self.parameter_file = self.repository_path / "parameter.yml"
+        self.parameter_file = self.repository_path / "config" / "parameter.yml"
         self.connections_found = {}
         self.references_found = {}
         
@@ -297,9 +297,9 @@ class ConnectionValidator:
         return internal_references
     
     def _analyze_parameter_file(self) -> Dict:
-        """Analyze parameter.yml for connection mappings"""
+        """Analyze ../config/parameter.yml for connection mappings"""
         if not self.parameter_file.exists():
-            return {'error': 'parameter.yml not found'}
+            return {'error': '../config/parameter.yml not found'}
         
         try:
             with open(self.parameter_file, 'r', encoding='utf-8') as f:
@@ -344,7 +344,7 @@ class ConnectionValidator:
             return mappings
             
         except Exception as e:
-            return {'error': f'Failed to parse parameter.yml: {str(e)}'}
+            return {'error': f'Failed to parse ../config/parameter.yml: {str(e)}'}
     
     def generate_report(self) -> str:
         """Generate a comprehensive connection analysis report"""
@@ -450,7 +450,7 @@ class ConnectionValidator:
         report.append("-" * 30)
         report.append("1. ✅ Choose target workspace (new or existing)")
         report.append("2. ✅ Create external connections manually in target workspace")
-        report.append("3. ✅ Update connection GUIDs in parameter.yml")
+        report.append("3. ✅ Update connection GUIDs in ../config/parameter.yml")
         report.append("4. ✅ Verify fabric-to-fabric references use dynamic variables")
         report.append("5. ✅ Test connectivity after migration")
         report.append("6. ✅ Validate existing items won't conflict (if using existing workspace)")
