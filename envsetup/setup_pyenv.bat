@@ -349,6 +349,66 @@ if %errorlevel% neq 0 (
 
 echo [OK] All dependencies installed successfully
 
+REM Install SqlPackage.exe for warehouse schema deployment
+echo.
+echo [CHECK] Checking SqlPackage.exe availability for warehouse schema deployment...
+where sqlpackage >nul 2>&1
+if %errorlevel% equ 0 (
+    echo [OK] SqlPackage.exe is already available
+    for /f "tokens=*" %%i in ('where sqlpackage') do (
+        echo    Location: %%i
+    )
+) else (
+    echo [INSTALL] SqlPackage.exe not found - installing via dotnet global tool...
+    echo    This enables warehouse schema deployment with DACPAC build/deploy
+    
+    REM Check if dotnet is available
+    where dotnet >nul 2>&1
+    if %errorlevel% neq 0 (
+        echo [WARNING] .NET SDK not found - attempting to install SqlPackage.exe manually
+        echo [INFO] For best results, install .NET SDK and re-run setup
+        echo [SKIP] Skipping SqlPackage.exe installation - warehouse deployment may require manual setup
+        goto skip_sqlpackage
+    )
+    
+    REM Install SqlPackage.exe as global dotnet tool
+    dotnet tool install --global Microsoft.SqlPackage
+    if %errorlevel% equ 0 (
+        echo [OK] SqlPackage.exe installed successfully as global dotnet tool
+        
+        REM Verify installation
+        where sqlpackage >nul 2>&1
+        if %errorlevel% equ 0 (
+            echo [OK] SqlPackage.exe verification successful
+            for /f "tokens=*" %%i in ('where sqlpackage') do (
+                echo    Location: %%i
+            )
+        ) else (
+            echo [WARNING] SqlPackage.exe installed but not found in PATH
+            echo [INFO] You may need to restart your command prompt
+        )
+    ) else (
+        echo [WARNING] SqlPackage.exe installation failed
+        echo [INFO] Warehouse schema deployment will require manual SqlPackage.exe setup
+        echo [INFO] Install with: dotnet tool install --global Microsoft.SqlPackage
+    )
+)
+
+:skip_sqlpackage
+
+REM Check ODBC Driver for SQL Server (for connection testing)
+echo.
+echo [CHECK] Checking Microsoft ODBC Driver for SQL Server...
+reg query "HKEY_LOCAL_MACHINE\SOFTWARE\ODBC\ODBCINST.INI" | findstr /i "SQL Server" >nul 2>&1
+if %errorlevel% equ 0 (
+    echo [OK] Microsoft ODBC Driver for SQL Server is available
+) else (
+    echo [WARNING] Microsoft ODBC Driver for SQL Server not detected
+    echo [INFO] This may affect warehouse connection testing capabilities
+    echo [INFO] Download from: https://docs.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server
+    echo [INFO] Usually pre-installed on Windows 10/11 systems
+)
+
 REM Verify installation (user environment)
 echo.
 echo [?] Verifying installation in user virtual environment...
@@ -387,6 +447,9 @@ echo    python fabric_deploy.py --workspace-id "your-workspace-id" --repo-url "r
 echo.
 echo [FOLDER] Deploy from local directory:
 echo    python fabric_deploy.py --workspace-id "your-workspace-id" --local-path "./my-fabric-items"
+echo.
+echo [WAREHOUSE] Deploy with warehouse schemas (requires SqlPackage.exe):
+echo    python fabric_deploy.py --workspace-id "your-workspace-id" --repo-url "repo-url" --include-warehouse-schemas
 echo.
 echo [TEST] Dry run (analyze only):
 echo    python fabric_deploy.py --workspace-id "your-workspace-id" --repo-url "repo-url" --dry-run
@@ -475,6 +538,7 @@ echo.
 echo [OK] Python 3.12.10 installed via pyenv (user directory)
 echo [OK] Virtual environment 'fabric-cicd-venv' created (user directory)
 echo [OK] fabric-cicd and dependencies installed (user virtual environment)
+echo [OK] SqlPackage.exe configured for warehouse schema deployment
 echo [OK] VS Code configured for user environment
 echo [OK] Activation script created: envsetup/activate_fabric_env_pyenv.bat
 echo.
@@ -507,7 +571,9 @@ echo 1. All installations are in user directories - no admin needed
 echo 2. Virtual environments always use user permissions
 echo 3. If pyenv installation fails, check git is available
 echo 4. Ensure you have write access to %USERPROFILE% and current directory
-echo 4. Contact your IT department if corporate policies block installations
+echo 5. If SqlPackage.exe installation fails, install .NET SDK first
+echo 6. For warehouse deployment without SqlPackage.exe, use SQL files directly
+echo 7. Contact your IT department if corporate policies block installations
 echo.
 
 echo [OK] Setup script completed!

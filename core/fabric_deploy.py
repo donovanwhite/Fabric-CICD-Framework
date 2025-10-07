@@ -13,6 +13,7 @@ SUCCESSFUL APPROACH:
 ✅ Avoids complex parameter.yml configurations that cause validation errors
 ✅ Specifies item types based on actual repository analysis
 ✅ Successfully tested with 8 Fabric items across subdirectories
+✅ NEW: Automatically deploys warehouse schema objects (tables, views, procedures) after warehouse deployment
 
 KEY LEARNINGS FROM TESTING:
 1. Complex parameter.yml files cause validation errors ("Invalid parameter name 'find_key'")
@@ -44,6 +45,15 @@ Example:
         --workspace-id "your-workspace-id-here" \
         --repo-url "https://dev.azure.com/yourorg/YourProject/_git/YourRepo" \
         --branch main
+        
+NEW: Warehouse Schema Deployment:
+    Automatically scans for SQL files in these locations after warehouse deployment:
+    • {warehouse_name}_sql/ folder
+    • {warehouse_name}_schema/ folder  
+    • sql/{warehouse_name}/ folder
+    • {warehouse_name}.Warehouse/sql/ folder
+    
+    Skip with: --skip-warehouse-schemas
 """
 
 import os
@@ -51,6 +61,7 @@ import sys
 import tempfile
 import shutil
 import argparse
+from pathlib import Path
 from pathlib import Path
 
 # Check dependencies
@@ -65,6 +76,149 @@ except ImportError as e:
     print("   pip install fabric-cicd GitPython azure-identity")
     print("   Optional: pip install PyYAML (for parameter file support)")
     sys.exit(1)
+
+# Import warehouse schema deployment using SqlPackage.exe (required)
+try:
+    from warehouse_schema_deploy_sqlpackage import WarehouseSchemaDeployer, has_sqlpackage_support
+    WAREHOUSE_SCHEMA_AVAILABLE = has_sqlpackage_support()
+    if not WAREHOUSE_SCHEMA_AVAILABLE:
+        print("⚠️  SqlPackage.exe not found - warehouse schema deployment disabled")
+        print("💡 Please install SQL Server Data Tools or SqlPackage to enable schema deployment")
+except ImportError:
+    WAREHOUSE_SCHEMA_AVAILABLE = False
+    print("⚠️  Warehouse schema deployment module not available")
+
+def deploy_warehouse_schemas(workspace_id, local_path, dry_run=False):
+    """
+    Deploy warehouse schema objects after Fabric warehouse items are deployed
+    
+    Args:
+        workspace_id: Fabric workspace ID
+        local_path: Local path to scan for warehouse items and SQL files
+        dry_run: If True, only analyze without deploying
+    
+    Returns:
+        dict: Summary of schema deployment results
+    """
+    if not WAREHOUSE_SCHEMA_AVAILABLE:
+        print("ℹ️  Warehouse schema deployment not available (missing mssql-python or lxml)")
+        return {'warehouses_found': 0, 'schemas_deployed': 0, 'errors': []}
+    
+    print("\n🏛️  WAREHOUSE SCHEMA DEPLOYMENT")
+    print("=" * 50)
+    print(f"🔍 DEBUG: Scanning path: {local_path}")
+    print(f"🔍 DEBUG: WAREHOUSE_SCHEMA_AVAILABLE = {WAREHOUSE_SCHEMA_AVAILABLE}")
+    
+    schema_summary = {
+        'warehouses_found': 0,
+        'schemas_deployed': 0,
+        'errors': []
+    }
+    
+    try:
+        # Scan for warehouse items in the deployment
+        warehouse_items = []
+        local_path_obj = Path(local_path)
+        
+        # Look for .Warehouse folders or files
+        for item in local_path_obj.rglob("*"):
+            if item.is_dir() and item.name.endswith('.Warehouse'):
+                warehouse_name = item.name.replace('.Warehouse', '')
+                warehouse_items.append(warehouse_name)
+                print(f"📦 Found warehouse: {warehouse_name}")
+                print(f"   📂 Warehouse path: {item}")
+        
+        if not warehouse_items:
+            print("ℹ️  No warehouse items found - skipping schema deployment")
+            return schema_summary
+        
+        schema_summary['warehouses_found'] = len(warehouse_items)
+        
+        # Deploy schemas for each warehouse found
+        for warehouse_name in warehouse_items:
+            print(f"\n🔍 Looking for SQL Project for warehouse: {warehouse_name}")
+            
+            # ALWAYS require SQL project (.sqlproj) files - this is the mandatory approach
+            sqlproj_found = None
+            possible_sqlproj_locations = [
+                # Standard patterns for sqlproj files (most common patterns first)
+                local_path_obj / "warehouses" / f"{warehouse_name}.Warehouse" / f"{warehouse_name}.sqlproj",
+                local_path_obj / f"{warehouse_name}.Warehouse" / f"{warehouse_name}.sqlproj",
+                local_path_obj / f"{warehouse_name}.sqlproj",
+                local_path_obj / "sql" / warehouse_name / f"{warehouse_name}.sqlproj",
+                local_path_obj / "schemas" / warehouse_name / f"{warehouse_name}.sqlproj"
+            ]
+            
+            for sqlproj_path in possible_sqlproj_locations:
+                if sqlproj_path.exists() and sqlproj_path.is_file():
+                    sqlproj_found = sqlproj_path
+                    print(f"  🎯 Found SQL Project: {sqlproj_path}")
+                    print(f"     ✅ Using SQL project for reliable, dependency-aware deployment")
+                    break
+            
+            # Require SQL project - no fallback to individual files
+            if not sqlproj_found:
+                print(f"  ❌ No SQL project (.sqlproj) file found for warehouse: {warehouse_name}")
+                print(f"     📋 SQL projects are required for reliable deployment")
+                print(f"     💡 Expected locations:")
+                for loc in possible_sqlproj_locations:
+                    print(f"        • {loc}")
+                print(f"     �️  Please create a SQL project file to ensure proper deployment")
+                schema_summary['errors'].append(f"No SQL project found for warehouse {warehouse_name}")
+                continue
+                
+            # Deploy schema using SQL project (required method)
+            if sqlproj_found:
+                try:
+                    print(f"🚀 Deploying schema for warehouse: {warehouse_name} (using SQL Project)")
+                    print(f"  📂 SQL Project: {sqlproj_found}")
+                    
+                    if dry_run:
+                        print("🔍 [DRY RUN] Would deploy from SQL project")
+                        schema_summary['schemas_deployed'] += 1
+                    else:
+                        # Initialize warehouse schema deployer (SqlPackage.exe)
+                        deployer = WarehouseSchemaDeployer(
+                            warehouse_name=warehouse_name,
+                            workspace_id=workspace_id
+                        )
+                        
+                        # Deploy from SQL project using SqlPackage.exe
+                        result = deployer.deploy_from_sqlproj(str(sqlproj_found), dry_run=False)
+                        if result.success:
+                            print(f"  ✅ SQL Project deployment successful: {result.objects_deployed} objects")
+                            schema_summary['schemas_deployed'] += result.objects_deployed
+                        else:
+                            error_count = len(result.errors) if result.errors else 0
+                            print(f"  ❌ SQL Project deployment failed: {error_count} errors")
+                            if result.errors:
+                                schema_summary['errors'].extend(result.errors)
+                            
+                except Exception as e:
+                    error_msg = f"Schema deployment error for {warehouse_name}: {str(e)}"
+                    print(f"  ❌ {error_msg}")
+                    schema_summary['errors'].append(error_msg)
+                    
+                # Note: SQL project is required - no fallback to individual files
+        
+        # Print summary
+        print(f"\n📊 Schema Deployment Summary:")
+        print(f"   Warehouses found: {schema_summary['warehouses_found']}")
+        print(f"   Schema objects deployed: {schema_summary['schemas_deployed']}")
+        print(f"   Errors: {len(schema_summary['errors'])}")
+        
+        if schema_summary['errors']:
+            print(f"\n❌ Schema Deployment Errors:")
+            for error in schema_summary['errors']:
+                print(f"   • {error}")
+        
+        return schema_summary
+        
+    except Exception as e:
+        error_msg = f"Warehouse schema deployment failed: {str(e)}"
+        print(f"❌ {error_msg}")
+        schema_summary['errors'].append(error_msg)
+        return schema_summary
 
 def check_version_compatibility():
     """Check Python and fabric-cicd version compatibility"""
@@ -153,7 +307,7 @@ def analyze_repository(repo_path):
     
     return list(found_types), total_items
 
-def deploy_with_error_handling(workspace):
+def deploy_with_error_handling(workspace, repo_path, skip_warehouse_schemas=False):
     """Deploy Fabric items with enhanced error handling for individual item failures."""
     print("🚀 Starting deployment with enhanced error handling...")
     
@@ -169,6 +323,11 @@ def deploy_with_error_handling(workspace):
         print("📦 Attempting bulk deployment using publish_all_items()...")
         result = publish_all_items(workspace)
         print("✅ Bulk deployment completed successfully!")
+        
+        # Deploy warehouse schemas after successful Fabric item deployment
+        if not skip_warehouse_schemas:
+            schema_result = deploy_warehouse_schemas(workspace.workspace_id, repo_path, dry_run=False)
+        
         return result
         
     except Exception as bulk_error:
@@ -205,6 +364,16 @@ def deploy_with_error_handling(workspace):
                         publish_method()
                         print(f"   ✅ {item_type} deployed successfully")
                         deployment_summary['successful'].append(item_type)
+                        
+                        # Deploy warehouse schemas after successful warehouse deployment
+                        if item_type == 'warehouses' and not skip_warehouse_schemas:
+                            print("   🏛️  Deploying warehouse schemas...")
+                            schema_result = deploy_warehouse_schemas(workspace.workspace_id, repo_path, dry_run=False)
+                            if schema_result['schemas_deployed'] > 0:
+                                print(f"   ✅ Warehouse schemas deployed: {schema_result['schemas_deployed']} objects")
+                            elif schema_result['warehouses_found'] > 0:
+                                print("   ℹ️  Warehouses found but no SQL schema files detected")
+                            
                     else:
                         print(f"   ⚠️  No publish method for {item_type}, skipping")
                         deployment_summary['skipped'].append(item_type)
@@ -298,6 +467,9 @@ Examples:
   
   # Configuration-based deployment with service principal
   python fabric_deploy.py --config-file "../config/config.yml" --environment prod --client-id "sp-client-id" --client-secret "sp-secret" --tenant-id "tenant-id"
+  
+  # Skip automatic warehouse schema deployment
+  python fabric_deploy.py --workspace-id "your-workspace-id" --repo-url "repo-url" --skip-warehouse-schemas
         """
     )
     
@@ -325,6 +497,8 @@ Examples:
                        help='Analyze repository without deploying')
     parser.add_argument('--item-types', nargs='*',
                        help='Specific item types to deploy (auto-detected if not specified)')
+    parser.add_argument('--skip-warehouse-schemas', action='store_true',
+                       help='Skip automatic warehouse schema deployment (default: deploy schemas if SQL files found)')
     
     args = parser.parse_args()
     
@@ -581,7 +755,7 @@ Examples:
         print()
         
         try:
-            result = deploy_with_error_handling(workspace)
+            result = deploy_with_error_handling(workspace, repo_path, skip_warehouse_schemas=args.skip_warehouse_schemas)
             
             print("✅ DEPLOYMENT COMPLETED!")
             print(f"📊 Result: {result}")

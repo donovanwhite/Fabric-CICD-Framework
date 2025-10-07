@@ -1,103 +1,74 @@
-# Manual Deployment and Utility Scripts
+# Manual Deployment Scripts
 
-This folder contains scripts for manual operations, validation, and troubleshooting.
+This folder contains scripts for manual deployment operations.
 
 ## Files
 
-### Compatibility and Migration
-- **`check_compatibility.py`** - Checks system compatibility with fabric-cicd requirements
-- **`check_migration.py`** - Validates migration to v0.1.29 and checks for breaking changes
-- **`check_python.py`** - Validates Python version and environment setup
-
-### Connection and Validation
-- **`validate_connections.py`** - Tests connectivity to Fabric workspaces and Azure services
+- **`deploy.bat`** - Windows batch script for quick manual deployment
 
 ## Usage
 
-### System Compatibility Check
-```bash
-python check_compatibility.py
+### Manual Deployment
+```batch
+deploy.bat
 ```
-Validates:
-- Python version compatibility (3.9-3.12)
-- Required package availability
-- System prerequisites
 
-### Migration Validation
+This script provides a simple interface for manual deployment operations when you need to deploy outside of automated CI/CD processes.
+
+For automated deployments, use the main deployment script:
 ```bash
-python check_v29_migration.py
+cd ../core
+python fabric_deploy.py --workspace-id "your-workspace-id" --repo-url "your-repo-url"
 ```
-Checks:
-- Breaking changes in v0.1.29
-- Deprecated parameter formats
-- New feature compatibility
-- Configuration file validity
 
-### Python Environment Check
-```bash
-python check_python.py
-```
-Verifies:
-- Python version and installation
-- Virtual environment status
-- Package dependencies
+## Environment Setup
 
-### Connection Validation
-```bash
-python validate_connections.py
-```
-Tests:
-- Azure authentication
-- Fabric workspace connectivity
-- Service principal permissions
-- Network connectivity
+Before using manual deployment scripts, ensure your environment is set up:
+```batch
+cd ../envsetup
+setup_pyenv.bat
+## Prerequisites
 
-## Troubleshooting Guide
+Before using manual deployment:
 
-### Common Issues
-
-1. **Authentication Failures**
-   - Run `validate_connections.py` to diagnose
-   - Check service principal permissions
-   - Verify tenant ID and client credentials
-
-2. **Version Compatibility**
-   - Use `check_compatibility.py` for system validation
-   - Update Python version if needed
-   - Upgrade fabric-cicd package
-
-3. **Migration Issues**
-   - Run `check_migration.py` before upgrading
-   - Review parameter file formats
-   - Update deprecated configurations
-
-4. **Network Issues**
-   - Check proxy settings
-   - Verify firewall rules
-   - Test Azure service connectivity
-
-## Manual Deployment Steps
-
-1. **Pre-deployment validation**:
-   ```bash
-   python check_compatibility.py
-   python validate_connections.py
+1. **Set up the environment**:
+   ```batch
+   cd ../envsetup
+   setup_pyenv.bat
    ```
 
-2. **Configuration validation**:
-   ```bash
-   python check_migration.py
+2. **Activate the environment**:
+   ```batch
+   cd ../envsetup
+   activate_fabric_env_pyenv.bat
    ```
 
-3. **Manual deployment**:
-   ```bash
+3. **Configure your deployment**:
+   - Update `../config/parameter.yml` with your workspace details
+   - Or use the configuration-based approach with `../config/config.yml`
+
+## Manual Deployment Process
+
+1. **Basic deployment**:
+   ```batch
+   deploy.bat
+   ```
+
+2. **Advanced deployment from core**:
+   ```batch
    cd ../core
-   python fabric_deploy.py
+   python fabric_deploy.py --workspace-id "your-workspace-id" --repo-url "your-repo-url"
    ```
 
-## Best Practices
+3. **With warehouse schema deployment**:
+   ```batch
+   cd ../core
+   python fabric_deploy.py --workspace-id "your-workspace-id" --repo-url "your-repo-url" --include-warehouse-schemas
+   ```
 
-- Always run compatibility checks before deployment
-- Validate connections in new environments
-- Use migration checker when upgrading fabric-cicd versions
-- Keep these scripts updated with environment changes
+## Features
+
+- Simple batch script interface for quick deployments
+- Integration with the core deployment engine
+- Support for warehouse schema deployment
+- Environment validation through setup scripts

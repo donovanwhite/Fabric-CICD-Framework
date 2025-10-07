@@ -13,6 +13,14 @@ This folder contains scripts for setting up the Python environment and dependenc
 - **Package Manager**: pip
 - **Virtual Environment**: pyenv or venv recommended
 
+## Additional Requirements for Warehouse Schema Deployment
+
+- **SqlPackage.exe**: Microsoft's database deployment tool (installed automatically via .NET global tool)
+- **Microsoft ODBC Driver for SQL Server**: Required for connection testing
+  - Windows: Usually pre-installed or available via Windows Update
+  - Manual install: Download from Microsoft (ODBC Driver 17 or 18 for SQL Server)
+- **.NET SDK**: Required for SqlPackage.exe installation and SQL project builds
+
 ## Setup Process
 
 ### 1. Initial Setup

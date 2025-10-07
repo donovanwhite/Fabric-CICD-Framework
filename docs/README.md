@@ -200,9 +200,9 @@ If you encounter connection permission errors:
 ├── activate_fabric_env_pyenv.bat # Quick pyenv environment activation
 └── requirements.txt              # Python dependencies (moved to envsetup/)
 
-🛠️  UTILITIES
-├── check_python.py              # Environment verification  
-└── validate_connections.py      # Connection validation
+🛠️  MANUAL DEPLOYMENT
+└── manual/
+    └── deploy.bat               # Manual deployment script
 
 📋 CONFIGURATION
 ├── parameter.yml                # Basic parameter file
@@ -210,8 +210,9 @@ If you encounter connection permission errors:
 ├── config.yml                   # NEW: v0.1.29 configuration-based deployment
 └── azure-pipelines.yml          # Azure DevOps pipeline
 
-🧪 TESTING
-└── test_hybrid_deployment.bat   # Test script
+💾 WAREHOUSE SCHEMA DEPLOYMENT
+└── core/
+    └── warehouse_schema_deploy_sqlpackage.py  # SQL schema deployment engine
 
 📚 DOCUMENTATION
 ├── README.md                    # Main documentation

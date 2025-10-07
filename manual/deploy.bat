@@ -3,6 +3,10 @@ echo.
 echo ========================================
 echo   Fabric Interactive Deployment
 echo ========================================
+echo   - Fabric workspace item deployment
+echo   - Warehouse schema deployment (SQL Project)
+echo   - SqlPackage.exe integration
+echo ========================================
 echo.
 
 if not exist "interactive_deploy.py" (

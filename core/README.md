@@ -6,6 +6,7 @@ This folder contains the core deployment scripts and utilities for the Fabric CI
 
 - **`fabric_deploy.py`** - Main deployment script with traditional and configuration-based approaches
 - **`supported_item_types.py`** - Definitive reference for officially supported Fabric item types
+- **`warehouse_schema_deploy_sqlpackage.py`** - Warehouse schema deployment engine using SqlPackage.exe
 
 ## fabric_deploy.py
 
@@ -24,6 +25,7 @@ python fabric_deploy.py --config-file ../config/config.yml
 ## Key Features
 
 - **Dual deployment modes**: Traditional parameters and new configuration-based approach
+- **Warehouse schema deployment**: Automated SQL schema deployment using SqlPackage.exe
 - **Enhanced error handling**: Comprehensive logging and validation
 - **Environment flexibility**: Support for multiple environments and authentication methods
 - **Item type validation**: Ensures only supported item types are deployed
@@ -37,7 +39,10 @@ See `supported_item_types.py` for the complete list of officially supported item
 - fabric-cicd >= 0.1.29
 - azure-identity
 - GitPython
-- pyyaml
+- PyYAML
+- requests (for Fabric API calls)
+- pyodbc (for SQL Server connections)
+- SqlPackage.exe (for warehouse schema deployment)
 
 ## Usage Examples
 

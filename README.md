@@ -1,6 +1,6 @@
-# Microsoft Fabric CI/CD Migration Framework
+# Microsoft Fabric CI/CD Framework
 
-A comprehensive framework for deploying Microsoft Fabric items using CI/CD pipelines, built on fabric-cicd v0.1.29.
+A comprehensive framework for deploying Microsoft Fabric items and warehouse schemas using CI/CD pipelines, built on fabric-cicd v0.1.29.
 
 > 📚 **Need more details?** For comprehensive troubleshooting, lessons learned, and advanced scenarios, see the **[📖 COMPLETE GUIDE](docs/COMPLETE_GUIDE.md)**
 
@@ -39,32 +39,45 @@ See the `docs/` folder for comprehensive documentation and guides.2. **NEW: Conf
 
    - Use `deploy_with_config()` for advanced scenarios
 
-## Requirements   - Centralized configuration with environment-specific settings
+## Requirements
 
-   
+- Python 3.9-3.12 (recommended: 3.11)
+- fabric-cicd >= 0.1.29
+- Azure DevOps access or Service Principal authentication
+- SqlPackage.exe (for warehouse schema deployment)
+- Microsoft ODBC Driver for SQL Server
 
-- Python 3.9-3.123. **Let fabric-cicd Handle Subdirectories Natively**
+## Features
 
-- fabric-cicd >= 0.1.29   - Don't flatten repository structures
-
-- Azure DevOps access or Service Principal authentication   - fabric-cicd supports workspace subfolders out of the box
-
-   
-
-## Features4. **Support All 21 Item Types (v0.1.29)**
-
-   - Auto-detect or manually specify item types
-
-- **Configuration-based deployment** using v0.1.29 features   - Includes new ApacheAirflowJob and MountedDataFactory types
-
+- **Configuration-based deployment** using v0.1.29 features
+- **Warehouse schema deployment** with automated SQL project builds
 - **Enhanced parameterization** with environment-specific values
+- **21 supported item types** for comprehensive Fabric coverage
+- **Modular architecture** for maintainability and scalability
+- **CI/CD integration** with Azure DevOps pipelines
 
-- **21 supported item types** for comprehensive Fabric coverage5. **Enhanced Parameterization Features**
+## Key Success Factors
 
-- **Modular architecture** for maintainability and scalability   - Use `_ALL_` environment key for universal values
+1. **Use Simple `publish_all_items()` Function**
+   - Follow the basic fabric-cicd documentation pattern
+   - Avoid complex parameter.yml configurations that cause validation errors
 
-- **CI/CD integration** with Azure DevOps pipelines   - Environment variable replacement with `$ENV:` prefix
-   - Advanced dynamic replacement variables
+2. **Configuration-Based Deployment (v0.1.29)**
+   - Use `deploy_with_config()` for advanced scenarios
+   - Centralized configuration with environment-specific settings
+
+3. **Let fabric-cicd Handle Subdirectories Natively**
+   - Don't flatten repository structures
+   - fabric-cicd supports workspace subfolders out of the box
+
+4. **Support All 21 Item Types (v0.1.29)**
+   - Auto-detect or manually specify item types
+   - Includes new ApacheAirflowJob and MountedDataFactory types
+
+5. **Automated Warehouse Schema Deployment**
+   - Uses dotnet build + SqlPackage.exe for reliable DACPAC deployment
+   - Fabric API integration for connection strings
+   - Active Directory Interactive authentication
 
 6. **Use DefaultAzureCredential**
    - Reliable authentication method
@@ -135,24 +148,29 @@ python core/fabric_deploy.py \
 ### 7. Verify
 Check your Fabric workspace - all items should be deployed with folder structure preserved!
 
-## 🆕 WAREHOUSE SCHEMA DEPLOYMENT
+## 🆕 AUTOMATIC WAREHOUSE SCHEMA DEPLOYMENT
 
-**NEW CAPABILITY**: Deploy database schema objects (tables, views, stored procedures) to Fabric Warehouses!
+**INTEGRATED CAPABILITY**: Automatically deploys database schema objects (tables, views, stored procedures) to Fabric Warehouses during regular deployment!
 
-### Quick Start with Schema Deployment
+### ✨ Zero Configuration Required
 ```bash
-# Deploy Fabric items AND warehouse schemas
-python core/enhanced_fabric_deploy.py \
+# Deploy Fabric items AND warehouse schemas automatically
+python core/fabric_deploy.py \
     --workspace-id "your-workspace-id" \
-    --repo-url "https://dev.azure.com/org/project/_git/repo" \
-    --deploy-schemas
+    --repo-url "https://dev.azure.com/org/project/_git/repo"
 
-# Deploy only schemas to existing warehouses  
-python core/enhanced_fabric_deploy.py \
-    --workspace-id "your-workspace-id" \
-    --local-path "./my-repo" \
-    --deploy-schemas-only \
-    --warehouse-name "my_warehouse"
+# That's it! Schemas deploy automatically if SQL files are found
+```
+
+### 📁 SQL File Auto-Discovery
+Place SQL files in any of these locations and they'll be deployed automatically:
+```
+your-repo/
+├── analytics_wh.Warehouse/       # Fabric warehouse item
+├── analytics_wh_sql/             # ✅ Auto-detected
+├── analytics_wh_schema/          # ✅ Auto-detected  
+├── sql/analytics_wh/             # ✅ Auto-detected
+└── schemas/analytics_wh/         # ✅ Auto-detected
 ```
 
 ### What's Supported
@@ -168,7 +186,7 @@ python core/enhanced_fabric_deploy.py \
 ### Prerequisites
 ```bash
 # Install enhanced dependencies
-pip install pyodbc lxml
+pip install mssql-python lxml
 
 # Ensure ODBC Driver 18 for SQL Server is installed
 # Download from: https://go.microsoft.com/fwlink/?linkid=2187214
@@ -266,9 +284,9 @@ If you encounter connection permission errors:
 ├── activate_fabric_env_pyenv.bat # Quick pyenv environment activation
 └── requirements.txt              # Python dependencies (moved to envsetup/)
 
-🛠️  UTILITIES
-├── check_python.py              # Environment verification  
-└── validate_connections.py      # Connection validation
+🛠️  MANUAL DEPLOYMENT
+└── manual/
+    └── deploy.bat               # Manual deployment script
 
 📋 CONFIGURATION
 └── config/
@@ -279,8 +297,9 @@ If you encounter connection permission errors:
 └── devops/
     └── azure-pipelines.yml      # Azure DevOps pipeline
 
-🧪 TESTING
-└── test_hybrid_deployment.bat   # Test script
+💾 WAREHOUSE SCHEMA DEPLOYMENT
+└── core/
+    └── warehouse_schema_deploy_sqlpackage.py  # SQL schema deployment engine
 
 📚 DOCUMENTATION
 ├── README.md                    # Main documentation
@@ -297,14 +316,6 @@ Our solution was developed through extensive testing:
 3. **Deployment Approaches** - Multiple strategies tested
 4. **Error Resolution** - Parameter validation issues solved
 5. **Success Verification** - All 8 items deployed successfully
-
-## 💡 KEY LEARNINGS FROM TESTING
-
-### ❌ What Doesn't Work
-- Complex parameter.yml files (cause validation errors)
-- Flattening repository structures (breaks folder organization)
-- Using advanced fabric-cicd configurations (unnecessary complexity)
-- REST API hybrid approaches (library is sufficient)
 
 ### ✅ What Works
 - Simple `publish_all_items(workspace)` function
