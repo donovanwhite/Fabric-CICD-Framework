@@ -19,6 +19,14 @@ packaging>=21.0
 # YAML parsing for parameter.yml
 PyYAML>=6.0
 
+# Warehouse Schema Deployment Dependencies (NEW)
+# ==============================================
+# SQL Server connectivity for Fabric Warehouses
+pyodbc>=4.0.35
+
+# XML parsing for SQL project files
+lxml>=4.9.0
+
 # Optional: Enhanced command line interface
 click>=8.0.0
 

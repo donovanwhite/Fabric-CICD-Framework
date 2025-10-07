@@ -135,6 +135,47 @@ python core/fabric_deploy.py \
 ### 7. Verify
 Check your Fabric workspace - all items should be deployed with folder structure preserved!
 
+## 🆕 WAREHOUSE SCHEMA DEPLOYMENT
+
+**NEW CAPABILITY**: Deploy database schema objects (tables, views, stored procedures) to Fabric Warehouses!
+
+### Quick Start with Schema Deployment
+```bash
+# Deploy Fabric items AND warehouse schemas
+python core/enhanced_fabric_deploy.py \
+    --workspace-id "your-workspace-id" \
+    --repo-url "https://dev.azure.com/org/project/_git/repo" \
+    --deploy-schemas
+
+# Deploy only schemas to existing warehouses  
+python core/enhanced_fabric_deploy.py \
+    --workspace-id "your-workspace-id" \
+    --local-path "./my-repo" \
+    --deploy-schemas-only \
+    --warehouse-name "my_warehouse"
+```
+
+### What's Supported
+✅ **Tables** (with constraints, indexes)  
+✅ **Views** (standard and indexed)  
+✅ **Stored Procedures** (all parameter types)  
+✅ **Functions** (scalar and table-valued)  
+✅ **Schemas, Types, Synonyms, Triggers**  
+✅ **SQL Project (.sqlproj) files**  
+✅ **Directory-based SQL files**  
+✅ **Dependency ordering and validation**  
+
+### Prerequisites
+```bash
+# Install enhanced dependencies
+pip install pyodbc lxml
+
+# Ensure ODBC Driver 18 for SQL Server is installed
+# Download from: https://go.microsoft.com/fwlink/?linkid=2187214
+```
+
+📖 **[Complete Schema Deployment Guide](core/WAREHOUSE_SCHEMA_README.md)**
+
 ## 🔧 ENVIRONMENT SETUP GUIDE
 
 ### Python Environment Management
