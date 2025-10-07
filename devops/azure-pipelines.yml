@@ -38,8 +38,24 @@ stages:
 
     - script: |
         python -m pip install --upgrade pip
-        pip install fabric-cicd GitPython azure-identity
+        pip install fabric-cicd GitPython azure-identity pyodbc requests
       displayName: 'Install Dependencies'
+    
+    - script: |
+        # Install .NET SDK for warehouse schema deployment
+        wget https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh
+        chmod +x dotnet-install.sh
+        ./dotnet-install.sh --version latest
+        export PATH="$HOME/.dotnet:$PATH"
+        echo "##vso[task.setvariable variable=PATH]$HOME/.dotnet:$PATH"
+      displayName: 'Install .NET SDK'
+    
+    - script: |
+        # Install SqlPackage for warehouse schema deployment
+        export PATH="$HOME/.dotnet:$PATH"
+        dotnet tool install --global Microsoft.SqlPackage
+        echo "##vso[task.setvariable variable=PATH]$HOME/.dotnet/tools:$PATH"
+      displayName: 'Install SqlPackage.exe'
 
     - script: |
         echo "🔍 Validating repository structure..."
@@ -75,8 +91,24 @@ stages:
 
           - script: |
               python -m pip install --upgrade pip
-              pip install fabric-cicd GitPython azure-identity
+              pip install fabric-cicd GitPython azure-identity pyodbc requests
             displayName: 'Install Dependencies'
+          
+          - script: |
+              # Install .NET SDK for warehouse schema deployment
+              wget https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh
+              chmod +x dotnet-install.sh
+              ./dotnet-install.sh --version latest
+              export PATH="$HOME/.dotnet:$PATH"
+              echo "##vso[task.setvariable variable=PATH]$HOME/.dotnet:$PATH"
+            displayName: 'Install .NET SDK'
+          
+          - script: |
+              # Install SqlPackage for warehouse schema deployment
+              export PATH="$HOME/.dotnet:$PATH"
+              dotnet tool install --global Microsoft.SqlPackage
+              echo "##vso[task.setvariable variable=PATH]$HOME/.dotnet/tools:$PATH"
+            displayName: 'Install SqlPackage.exe'
 
           - script: |
               echo "🚀 Deploying Fabric items ..."
@@ -86,17 +118,22 @@ stages:
               echo "Config-based deployment: $(USE_CONFIG_DEPLOYMENT)"
               echo ""
               
+              # Ensure PATH includes .NET tools for warehouse schema deployment
+              export PATH="$HOME/.dotnet:$HOME/.dotnet/tools:$PATH"
+              
               if [ "$(USE_CONFIG_DEPLOYMENT)" = "true" ]; then
-                echo "🆕 Using v0.1.29 Configuration-based deployment"
+                echo "🆕 Using v0.1.29 Configuration-based deployment with warehouse schemas"
                 python core/fabric_deploy.py \
                   --config-file "$(CONFIG_FILE)" \
-                  --environment "$(ENVIRONMENT_NAME)"
+                  --environment "$(ENVIRONMENT_NAME)" \
+                  --include-warehouse-schemas
               else
-                echo "📦 Using traditional deployment approach"
+                echo "📦 Using traditional deployment approach with warehouse schemas"
                 python core/fabric_deploy.py \
                   --workspace-id "$(FABRIC_WORKSPACE_ID)" \
                   --repo-url "$(REPO_URL)" \
-                  --branch "$(BRANCH_NAME)"
+                  --branch "$(BRANCH_NAME)" \
+                  --include-warehouse-schemas
               fi
             displayName: 'Deploy Fabric Items'
             env:
@@ -125,17 +162,35 @@ stages:
 
     - script: |
         python -m pip install --upgrade pip
-        pip install fabric-cicd GitPython azure-identity
+        pip install fabric-cicd GitPython azure-identity pyodbc requests
       displayName: 'Install Dependencies'
+    
+    - script: |
+        # Install .NET SDK for warehouse schema validation
+        wget https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh
+        chmod +x dotnet-install.sh
+        ./dotnet-install.sh --version latest
+        export PATH="$HOME/.dotnet:$PATH"
+        echo "##vso[task.setvariable variable=PATH]$HOME/.dotnet:$PATH"
+      displayName: 'Install .NET SDK'
+    
+    - script: |
+        # Install SqlPackage for warehouse schema validation
+        export PATH="$HOME/.dotnet:$PATH"
+        dotnet tool install --global Microsoft.SqlPackage
+        echo "##vso[task.setvariable variable=PATH]$HOME/.dotnet/tools:$PATH"
+      displayName: 'Install SqlPackage.exe'
 
     - script: |
-        echo "🔍 Validating PR changes..."
+        echo "🔍 Validating PR changes with warehouse schema support..."
         echo "This is a Pull Request validation - no deployment will occur"
+        export PATH="$HOME/.dotnet:$HOME/.dotnet/tools:$PATH"
         python core/fabric_deploy.py \
           --workspace-id "$(FABRIC_WORKSPACE_ID)" \
           --repo-url "$(REPO_URL)" \
           --branch "$(System.PullRequest.SourceBranch)" \
-          --dry-run
+          --dry-run \
+          --include-warehouse-schemas
       displayName: 'Validate PR Changes (Dry Run)'
       env:
         AZURE_CLIENT_ID: $(AZURE_CLIENT_ID)
