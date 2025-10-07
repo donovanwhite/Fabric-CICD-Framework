@@ -155,7 +155,7 @@ def get_deployment_parameters():
         if validate_workspace_id(workspace_id):
             break
         print("❌ Invalid workspace ID format. Please enter a valid GUID.")
-        print("💡 Example: eb2f7de1-b2d5-4852-a744-735106d8dfe8")
+        print("💡 Example: 12345678-1234-1234-1234-123456789abc")
         print()
     
     print(f"✅ Workspace ID: {workspace_id}")
@@ -170,7 +170,7 @@ def get_deployment_parameters():
         print("-" * 30)
         
         repo_url = get_user_input("🔗 Repository URL", 
-                                "https://dev.azure.com/contosodwft/SASSA%20Fabric%20Data%20Plaftorm/_git/SASSA%20Fabric%20Data%20Plaftorm")
+                                "https://dev.azure.com/yourorg/YourProject/_git/YourRepo")
         
         branch = get_user_input("🌿 Branch name", "development")
         

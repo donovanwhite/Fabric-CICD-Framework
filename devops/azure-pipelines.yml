@@ -11,7 +11,7 @@ pool:
 
 variables:
   # Fabric Configuration
-  FABRIC_WORKSPACE_ID: 'eb2f7de1-b2d5-4852-a744-735106d8dfe8'  # Replace with your workspace ID
+  FABRIC_WORKSPACE_ID: 'your-workspace-id-here'  # Replace with your workspace ID
   PYTHON_VERSION: '3.11'
   
   # Repository Configuration (automatically populated by Azure DevOps)

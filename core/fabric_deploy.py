@@ -41,8 +41,8 @@ Usage:
     
 Example:
     python fabric_deploy.py \
-        --workspace-id "eb2f7de1-b2d5-4852-a744-735106d8dfe8" \
-        --repo-url "https://dev.azure.com/contoso/Project/_git/repo" \
+        --workspace-id "your-workspace-id-here" \
+        --repo-url "https://dev.azure.com/yourorg/YourProject/_git/YourRepo" \
         --branch main
 """
 
